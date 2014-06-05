@@ -6,11 +6,28 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
-    	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd">
+    	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd
+    	http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
+
+    <!-- Factory bean that creates the Mongo instance -->
+    <bean id="mongo" class="org.springframework.data.mongodb.core.MongoFactoryBean">
+        <property name="host" value="localhost" />
+    </bean>
+     
+    <!-- MongoTemplate for connecting and quering the documents in the database -->
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongo" ref="mongo" />
+        <constructor-arg name="databaseName" value="test" />
+    </bean>
 
 	<context:component-scan base-package="com.tcs.klm" />
 	<context:annotation-config />
 	
+<!-- 	<context:component-scan base-package="com.tcs.klm.fancylog.task" />
+	<mvc:annotation-driven /> -->
+	<util:map id="logAnalyzerMap" map-class="java.util.HashMap" 
+			key-type="java.lang.String" value-type="com.tcs.klm.fancylog.utils.LogAnalyzer">
+
 	<util:properties id="environmentProperties" location="file:D://dev//config//mongodb-poc//environment.properties" />
 	<context:property-placeholder location="file:D://dev//config//mongodb-poc//environment.properties" />
 
@@ -42,7 +59,7 @@
 	</bean>
 
 	<bean name="analyzeJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="com.tcs.fancylog.analysis.job.FancyLogAnalysisJob" />
+		<property name="jobClass" value="com.tcs.klm.fancylog.job.FancyLogAnalysisJob" />
 		<property name="jobDataAsMap">
 			<map>
 				<entry key="fancyLogAnalysisTask" value-ref="fancyLogAnalysisTask" />

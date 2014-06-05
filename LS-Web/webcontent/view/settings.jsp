@@ -33,7 +33,6 @@
  
         $('#SettingsContainer').jtable({
             title: 'Admintool Settings',
-            paging: true,
             sorting: true,
             defaultSorting: 'ApplicationName ASC',
             actions: {
@@ -43,38 +42,61 @@
                 createAction: '../config/settings/new'
             },
             fields: {
-                Id: {
+                id: {
                     key: true,
                     create: false,
                     edit: false,
                     list: false
                 },
-                ApplicationName: {
+                applicationName: {
                     title: 'Application Name'
                 },
-                FancyLogURLPattern: {
+                fancyLogURLPattern: {
                     title: 'URL Pattern',
                     sorting: false,
                     width: '20%'
                 },
-                Host: {
+                host: {
                 	title: 'Host'
                 },
-                NodeList: {
+                nodeList: {
                     title: 'Server Names(separated by comma)',
                     width: '18%',
                     sorting: false
                 },
-                Instance: {
+                instance: {
                     title: 'Instance',
                     options: { 'a': 'a', 'b': 'b', 'c':'c'}
                 },
-                SessionIdPosition: {
+                sessionIdPosition: {
                     title: 'SessionId Possition',
                     sorting: false
                 },
-                NoOfDays: {
+                noOfDays: {
                 	title: 'No of Days'
+                },
+                fileName: {
+                	title: 'File name',
+                	visibility:'hidden'
+                },
+                downloadLocation: {
+                	title: 'Dowload location',
+                	visibility:'hidden'
+                },
+                logInURL: {
+                	title: 'Login URL',
+                	sorting: false,
+                	visibility:'hidden'
+                },
+                userName: {
+                	title: 'Username',
+                	sorting: false,
+                	visibility:'hidden'
+                },
+                passWord: {
+                	title: 'Password',
+                	sorting: false,
+                	visibility:'hidden'
                 }
              }
         });

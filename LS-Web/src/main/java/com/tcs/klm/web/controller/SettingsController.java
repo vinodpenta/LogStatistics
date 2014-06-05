@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.tcs.klm.domain.SettingsBean;
+import com.tcs.klm.web.domain.SettingsBean;
 import com.tcs.klm.web.services.SettingsService;
 
 @Controller
@@ -29,7 +29,7 @@ public class SettingsController {
         Map<String, Object> settingsMap = new HashMap<String, Object>();
         SettingsBean setting = new SettingsBean();
         List<SettingsBean> settings = new ArrayList<SettingsBean>();
-        settings.add(setting);
+        settings.addAll(settingsService.list());
         settingsMap.put("Records", settings);
         settingsMap.put("Result", "OK");
         return settingsMap;
@@ -40,6 +40,7 @@ public class SettingsController {
     public Map<String, Object> delete(@RequestParam
     String id) {
         Map<String, Object> settingsMap = new HashMap<String, Object>();
+        settingsService.delete(id);
         settingsMap.put("Result", "OK");
         return settingsMap;
     }
@@ -48,7 +49,7 @@ public class SettingsController {
     @ResponseBody
     public Map<String, Object> create(SettingsBean setting) {
         Map<String, Object> settingsMap = new HashMap<String, Object>();
-        settingsService.save();
+        settingsMap.put("Record", settingsService.save(setting));
         settingsMap.put("Result", "OK");
         return settingsMap;
     }
@@ -56,9 +57,9 @@ public class SettingsController {
     @RequestMapping(value = "/save")
     @ResponseBody
     public Map<String, Object> update(@ModelAttribute
-    Object setting) {
+    SettingsBean setting) {
         Map<String, Object> settingsMap = new HashMap<String, Object>();
-
+        settingsMap.put("Record", settingsService.save(setting));
         settingsMap.put("Result", "OK");
         return settingsMap;
     }
