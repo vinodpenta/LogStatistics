@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -14,18 +15,23 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.lang.StringUtils;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.tcs.klm.fancylog.analysis.LogAnalyzer;
 import com.tcs.klm.fancylog.domain.LogKey;
 import com.tcs.klm.fancylog.utils.FancySharedInfo;
-import com.tcs.klm.fancylog.utils.LogAnalyzer;
+import com.tcs.klm.fancylog.utils.Utils;
 
-@Component
+//import org.apache.commons.lang.stringutils;
+
+@Component(value = "fancyLogAnalysisTask")
 public class FancyLogAnalysisTask {
 
     @Autowired
@@ -43,6 +49,7 @@ public class FancyLogAnalysisTask {
 
     private static Map<String, String> lstTmpsessionIdUPR = new HashMap<String, String>();
     private static Map<String, String> lstTmpsessionMap = new HashMap<String, String>();
+    private static Map<String, List<String>> map = new HashMap<String, List<String>>();
 
     public void performTask() throws IOException {
         FancySharedInfo.getInstance().setAnalysisInProgress(true);
@@ -76,7 +83,7 @@ public class FancyLogAnalysisTask {
                     while ((sCurrentLine = br.readLine()) != null) {
                         if (sCurrentLine.startsWith(year)) {
                             try {
-                                processLastLine(sbf.toString(), sessionIDPossition, year);
+                                processLastLine(sbf.toString(), sessionIDPossition, year, file.getName());
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
@@ -94,7 +101,7 @@ public class FancyLogAnalysisTask {
         }
     }
 
-    private void processLastLine(String lineText, String sessionIDPossition, String year) {
+    private void processLastLine(String lineText, String sessionIDPossition, String year, String fileName) throws IOException {
         if (lineText.startsWith(year) && lineText.endsWith("Envelope>")) {
             String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
             String sessionID = null;
@@ -107,12 +114,15 @@ public class FancyLogAnalysisTask {
                     List<LogKey> logKeys = logAnalyzer.getLogKeyFromRequest(xmlPayload);
                     if (logKeys != null && !logKeys.isEmpty()) {
                         StringBuffer sbfTemp = new StringBuffer();
+                        sbfTemp.append(fileName).append("\n");
                         sbfTemp.append(lineText).append("\n");
                         lstTempLogs.put(sessionID, sbfTemp);
                         lstTmpKeys.put(sessionID, logKeys);
+
                         for (LogKey logKey : logKeys) {
                             lstTmpsessionIdUPR.put(logKey.getPassengerId(), sessionID);
                         }
+
                     }
                 }
             }
@@ -133,6 +143,33 @@ public class FancyLogAnalysisTask {
                             }
                         }
                     }
+                    StringBuffer log = lstTempLogs.get(sessionID);
+                    String strLog = log.toString();
+                    String compressedLog = Utils.compress(strLog);
+
+                    DBCollection dbCollectionLog = mongoTemplate.getCollection(COLLECTION_LOGS);
+
+                    DBObject dBObjectLog = new BasicDBObject();
+                    dBObjectLog.put("log", compressedLog);
+                    dbCollectionLog.insert(dBObjectLog);
+                    ObjectId id = (ObjectId) dBObjectLog.get("_ID");
+                    String logID = id.toString();
+
+                    List<LogKey> logKeys = lstTmpKeys.get(sessionID);
+                    for (LogKey key : logKeys) {
+                        key.setLogID(logID);
+                        mongoTemplate.insert(key, COLLECTION_TRANSACTION);
+                    }
+
+                    lstTmpKeys.remove(sessionID);
+                    lstTempLogs.remove(sessionID);
+                    List<String> wmSessionIDs = map.get(sessionID);
+                    if (wmSessionIDs != null) {
+                        for (String wmSessionID : wmSessionIDs) {
+                            lstTmpsessionMap.remove(wmSessionID);
+                        }
+                    }
+                    map.remove(sessionID);
                 }
                 else {
                     lstTmpKeys.remove(sessionID);
@@ -144,6 +181,17 @@ public class FancyLogAnalysisTask {
                 Set<String> keySet = lstTmpsessionMap.keySet();
                 if (lstTmpKeys.containsKey(sessionID)) {
                     lstTempLogs.get(sessionID).append(lineText).append("\n");
+                    if (lineText.contains("GetEticketDetails.CONSUMER_RESPONSE")) {
+                        serviceName = getServiceName(xmlPayload);
+                        LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
+                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload);
+                        if (responseLogKey != null) {
+                            List<LogKey> logKeys = lstTmpKeys.get(sessionID);
+                            for (LogKey logKey : logKeys) {
+                                logKey.setPNR(responseLogKey.getPNR());
+                            }
+                        }
+                    }
                 }
                 else if (keySet.contains(sessionID)) {
                     String flowSessionId = lstTmpsessionMap.get(sessionID);
@@ -157,9 +205,18 @@ public class FancyLogAnalysisTask {
                         if (lstTempLogs.get(flowSessionId) != null) {
                             lstTempLogs.get(flowSessionId).append(lineText).append("\n");
                             lstTmpsessionMap.put(sessionID, flowSessionId);
+                            if (map.containsKey(flowSessionId)) {
+                                map.get(flowSessionId).add(sessionID);
+                            }
+                            else {
+                                List<String> wmSessionIDs = new ArrayList<String>();
+                                wmSessionIDs.add(sessionID);
+                                map.put(flowSessionId, wmSessionIDs);
+                            }
                         }
                     }
                 }
+
             }
         }
     }

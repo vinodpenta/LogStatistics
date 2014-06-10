@@ -6,23 +6,23 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.tcs.klm.fancylog.domain.LogKey;
 import com.tcs.klm.fancylog.utils.Utils;
 
-@Component(value = "ListAvailableProducts")
-public class ListAvailableProducts extends LogAnalyzer {
+@Component(value = "GetSeatOffer")
+public class GetSeatOffer extends LogAnalyzer {
 
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder = null;
+    SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
     @Override
     public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
@@ -37,31 +37,29 @@ public class ListAvailableProducts extends LogAnalyzer {
             String host = null;
             String channel = null;
             String market = null;
-            value = xPath.compile("/Envelope/Body/ListAvailableProductsRequest/context/host").evaluate(doc);
+            value = xPath.compile("/Envelope/Body/GetSeatOfferRequest/context/host").evaluate(doc);
             if (value != null && value.length() > 0) {
                 host = value;
             }
-            value = xPath.compile("/Envelope/Body/ListAvailableProductsRequest/context/channel").evaluate(doc);
+            value = xPath.compile("/Envelope/Body/GetSeatOfferRequest/context/channel").evaluate(doc);
             if (value != null && value.length() > 0) {
                 channel = value;
             }
-            value = xPath.compile("/Envelope/Body/ListAvailableProductsRequest/context/market").evaluate(doc);
+            value = xPath.compile("/Envelope/Body/GetSeatOfferRequest/context/market").evaluate(doc);
             if (value != null && value.length() > 0) {
                 market = value;
             }
-            NodeList reservationNode = (NodeList) xPath.compile("/Envelope/Body/ListAvailableProductsRequest/airProduct/reservation").evaluate(doc, XPathConstants.NODESET);
-            for (int i = 0; i < reservationNode.getLength(); i++) {
-                value = xPath.compile("/Envelope/Body/ListAvailableProductsRequest/airProduct/reservation[" + (i + 1) + "]/reservationIdentifier").evaluate(doc);
-                if (value != null && value.length() > 0) {
-                    LogKey logKey = new LogKey();
-                    logKey.setPNR(value);
-                    logKey.setChannel(channel);
-                    logKey.setHost(host);
-                    logKey.setMarket(market);
-                    logKey.setServiceName("ListAvailableProducts");
-                    lstLogKey.add(logKey);
-                }
+            value = xPath.compile("/Envelope/Body/GetSeatOfferRequest/airProduct/reservation/reservationIdentifier").evaluate(doc);
+            if (value != null && value.length() > 0) {
+                LogKey logKey = new LogKey();
+                logKey.setPNR(value);
+                logKey.setChannel(channel);
+                logKey.setHost(host);
+                logKey.setMarket(market);
+                logKey.setServiceName("GetSeatOffer");
+                lstLogKey.add(logKey);
             }
+
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -78,25 +76,16 @@ public class ListAvailableProducts extends LogAnalyzer {
             builder = builderFactory.newDocumentBuilder();
             Document doc = builder.parse(new InputSource(new StringReader(xmlPayloadNameSpaceRemoved)));
             XPath xPath = XPathFactory.newInstance().newXPath();
-            value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/errorItem/errorCode").evaluate(doc);
+            value = xPath.compile("/Envelope/Body/GetSeatOfferResponse/errorItem/errorCode").evaluate(doc);
             if (value != null && value.length() > 0) {
                 logKey = new LogKey();
                 logKey.setErrorCode(value);
             }
-            value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/errorItem/errorText").evaluate(doc);
+            value = xPath.compile("/Envelope/Body/GetSeatOfferResponse/errorItem/errorText").evaluate(doc);
             if (value != null && value.length() > 0) {
                 logKey.setErrorDescription(value);
             }
 
-            value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/warningItem/warningText").evaluate(doc);
-            if (value != null && value.length() > 0) {
-                logKey = new LogKey();
-                logKey.setErrorDescription(value);
-            }
-            value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/warningItem/warningCode").evaluate(doc);
-            if (value != null && value.length() > 0) {
-                logKey.setErrorCode(value);
-            }
         }
         catch (Exception exception) {
             exception.printStackTrace();
@@ -104,4 +93,5 @@ public class ListAvailableProducts extends LogAnalyzer {
 
         return logKey;
     }
+
 }

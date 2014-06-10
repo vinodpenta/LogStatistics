@@ -1,4 +1,4 @@
-package com.tcs.klm.fancylog.utils;
+package com.tcs.klm.fancylog.analysis;
 
 import java.util.List;
 

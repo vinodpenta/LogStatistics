@@ -17,7 +17,7 @@ import com.tcs.klm.web.domain.SettingsBean;
 import com.tcs.klm.web.services.SettingsService;
 
 @Controller
-@RequestMapping(value = "/settings")
+@RequestMapping(value = "/settings", produces = "application/json")
 public class SettingsController {
 
     @Autowired
@@ -27,7 +27,6 @@ public class SettingsController {
     @ResponseBody
     public Map<String, Object> list() {
         Map<String, Object> settingsMap = new HashMap<String, Object>();
-        SettingsBean setting = new SettingsBean();
         List<SettingsBean> settings = new ArrayList<SettingsBean>();
         settings.addAll(settingsService.list());
         settingsMap.put("Records", settings);

@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.tcs.klm.fancylog.task.FancyLogAnalysisTask;
@@ -12,12 +11,7 @@ import com.tcs.klm.fancylog.utils.FancySharedInfo;
 
 public class FancyLogAnalysisJob extends QuartzJobBean {
 
-    @Autowired
     private FancyLogAnalysisTask fancyLogAnalysisTask;
-
-    public void setFancyLogDownloadTask(FancyLogAnalysisTask fancyLogAnalysisTask) {
-        this.fancyLogAnalysisTask = fancyLogAnalysisTask;
-    }
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -31,6 +25,10 @@ public class FancyLogAnalysisJob extends QuartzJobBean {
                 }
             }
         }
+    }
+
+    public void setFancyLogAnalysisTask(FancyLogAnalysisTask fancyLogAnalysisTask) {
+        this.fancyLogAnalysisTask = fancyLogAnalysisTask;
     }
 
 }

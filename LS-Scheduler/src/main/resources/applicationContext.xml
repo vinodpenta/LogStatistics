@@ -2,13 +2,19 @@
 <beans xmlns="http://www.springframework.org/schema/beans" 	xmlns:batch="http://www.springframework.org/schema/batch" 
 	xmlns:context="http://www.springframework.org/schema/context" xmlns:task="http://www.springframework.org/schema/task" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.2.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
     	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd
-    	http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
+    	http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
+    	http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
+	<context:component-scan base-package="com.tcs.klm" />
+	<context:annotation-config />
+	<mvc:annotation-driven/>
+	
     <!-- Factory bean that creates the Mongo instance -->
     <bean id="mongo" class="org.springframework.data.mongodb.core.MongoFactoryBean">
         <property name="host" value="localhost" />
@@ -20,16 +26,11 @@
         <constructor-arg name="databaseName" value="test" />
     </bean>
 
-	<context:component-scan base-package="com.tcs.klm" />
-	<context:annotation-config />
-	
-<!-- 	<context:component-scan base-package="com.tcs.klm.fancylog.task" />
-	<mvc:annotation-driven /> -->
-	<util:map id="logAnalyzerMap" map-class="java.util.HashMap" 
-			key-type="java.lang.String" value-type="com.tcs.klm.fancylog.utils.LogAnalyzer">
+	<!-- <util:map id="logAnalyzerMap" map-class="java.util.HashMap" 
+			key-type="java.lang.String" value-type="com.tcs.klm.fancylog.analysis.LogAnalyzer"> -->
 
-	<util:properties id="environmentProperties" location="file:D://dev//config//mongodb-poc//environment.properties" />
-	<context:property-placeholder location="file:D://dev//config//mongodb-poc//environment.properties" />
+<!-- 	<util:properties id="environmentProperties" location="file:D://dev//config//mongodb-poc//environment.properties" />
+	<context:property-placeholder location="file:D://dev//config//mongodb-poc//environment.properties" /> -->
 
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="jobDetails">
@@ -46,8 +47,8 @@
 		</property>
 	</bean>
 
-	<!-- <bean id="fancyLogDownloadTask" class="com.tcs.klm.fancylog.task.FancyLogDownloadTask" />
-	<bean id="fancyLogAnalysisTask" class="com.tcs.klm.fancylog.task.FancyLogAnalysisTask" /> -->
+ 	<bean id="fancyLogDownloadTask" class="com.tcs.klm.fancylog.task.FancyLogDownloadTask" />
+	<bean id="fancyLogAnalysisTask" class="com.tcs.klm.fancylog.task.FancyLogAnalysisTask" />
 
 	<bean name="downloadJob" class="org.springframework.scheduling.quartz.JobDetailBean">
 		<property name="jobClass" value="com.tcs.klm.fancylog.job.FancyLogDownloadJob" />

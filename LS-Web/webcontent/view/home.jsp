@@ -41,39 +41,39 @@
                 listAction: '../config/searchLogs',
             },
             fields: {
-                SessionId: {
+                sessionId: {
                     key: true,
                     edit: false,
                     list: false
                 },
-                Date: {
+                date: {
                     title: 'Record Date',
                     width: '20%'
                 },
-                ServiceName: {
+                serviceName: {
                     title: 'Service name',
                     width: '20%'
                 },
-                Host: {
+                host: {
                 	title: 'Host'
                 },
-                Market: {
+                market: {
                 	title: 'Market'
                 },
-                Channel: {
+                channel: {
                 	title:'Channel'
                 },
-                ErrorCode: {
+                errorCode: {
                     title: 'Error Code'
                 },
-                Error: {
+                error: {
                     title: 'Error Description(If any)'
                 },
-                View: {
+                view: {
                 	title: '',
                 	width: '1%'
                 },
-                Download: {
+                download: {
                 	title: '',
                 	width: '1%'
                 }
@@ -132,8 +132,7 @@
 		<nav class="navbar navbar-default" role="navigation">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<button class="navbar-toggle"
-					data-target="#bs-example-navbar-collapse-2" data-toggle="collapse"
+				<button class="navbar-toggle" data-target="#bs-example-navbar-collapse-2" data-toggle="collapse"
 					type="button">
 					<!-- <span class="sr-only">Toggle navigation</span> -->
 					<span class="icon-bar"></span> <span class="icon-bar"></span> <span
@@ -143,8 +142,7 @@
 			</div>
 			<form class="navbar-form navbar-left" role="search">
 				<div class="form-group">
-					<input type="text" class="form-control" placeholder="Search"
-						name="pnr" id="pnr">
+					<input type="text" class="form-control" placeholder="Search" name="pnr" id="pnr">
 				</div>
 				<button type="submit" class="btn btn-default" id="LoadRecords">
 					<span class="glyphicon glyphicon-search"></span> Search

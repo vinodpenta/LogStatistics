@@ -11,6 +11,7 @@ public class LogKey {
     private String errorDescription;
     private String passengerId;
     private String date;
+    private String logID;
 
     public String getPNR() {
         return PNR;
@@ -82,6 +83,14 @@ public class LogKey {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getLogID() {
+        return logID;
+    }
+
+    public void setLogID(String logID) {
+        this.logID = logID;
     }
 
 }

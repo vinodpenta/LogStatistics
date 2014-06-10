@@ -18,12 +18,10 @@
     </bean>
 
 	<context:component-scan base-package="com.tcs.klm.web.controller" />
-
-	<mvc:annotation-driven />
+	<mvc:annotation-driven/>
 
 	<context:component-scan base-package="com.tcs.klm.web.services" />
-
-	<context:annotation-config />
+	<context:annotation-config/>
 
 
  

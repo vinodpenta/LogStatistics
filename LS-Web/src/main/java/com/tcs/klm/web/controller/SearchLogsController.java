@@ -1,5 +1,6 @@
 package com.tcs.klm.web.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class SearchLogsController {
     public Map<String, Object> list(@RequestParam
     String pnr) {
         Map<String, Object> searchResultsMap = new HashMap<String, Object>();
-        searchResultsMap.put("Records", null);
+        searchResultsMap.put("Records", new ArrayList());
         System.out.println("searchResultsMap");
         searchResultsMap.put("Result", "OK");
         return searchResultsMap;
