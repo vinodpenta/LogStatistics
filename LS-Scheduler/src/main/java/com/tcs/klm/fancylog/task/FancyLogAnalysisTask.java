@@ -60,8 +60,8 @@ public class FancyLogAnalysisTask {
         while (settingsCursor.hasNext()) {
             DBObject settings = settingsCursor.next();
             String applicationName = (String) settings.get("applicationName");
-            COLLECTION_TRANSACTION = "transaction_" + applicationName + getCollectionName();
-            COLLECTION_LOGS = "log_" + applicationName + getCollectionName();
+            COLLECTION_TRANSACTION = "transactions";
+            COLLECTION_LOGS = "logs";
             if (!mongoTemplate.collectionExists(COLLECTION_LOGS)) {
                 mongoTemplate.createCollection(COLLECTION_LOGS);
             }
@@ -118,7 +118,6 @@ public class FancyLogAnalysisTask {
                         sbfTemp.append(lineText).append("\n");
                         lstTempLogs.put(sessionID, sbfTemp);
                         lstTmpKeys.put(sessionID, logKeys);
-
                         for (LogKey logKey : logKeys) {
                             lstTmpsessionIdUPR.put(logKey.getPassengerId(), sessionID);
                         }

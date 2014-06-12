@@ -3,8 +3,9 @@ Class-Path: spring-core-3.2.3.RELEASE.jar commons-logging-1.1.1.jar sp
  ring-context-3.2.3.RELEASE.jar spring-aop-3.2.3.RELEASE.jar aopallian
  ce-1.0.jar spring-beans-3.2.3.RELEASE.jar spring-expression-3.2.3.REL
  EASE.jar spring-web-3.2.3.RELEASE.jar spring-webmvc-3.2.3.RELEASE.jar
-  mongo-java-driver-2.11.0.jar spring-data-mongodb-1.2.0.RELEASE.jar s
- pring-tx-3.2.3.RELEASE.jar spring-data-commons-1.5.0.RELEASE.jar slf4
- j-api-1.7.1.jar jcl-over-slf4j-1.7.1.jar cglib-2.2.2.jar asm-3.3.1.ja
- r jackson-mapper-asl-1.9.12.jar jackson-core-asl-1.9.12.jar
+  servlet-api-2.5.jar mongo-java-driver-2.11.0.jar spring-data-mongodb
+ -1.2.0.RELEASE.jar spring-tx-3.2.3.RELEASE.jar spring-data-commons-1.
+ 5.0.RELEASE.jar slf4j-api-1.7.1.jar jcl-over-slf4j-1.7.1.jar cglib-2.
+ 2.2.jar asm-3.3.1.jar jackson-mapper-asl-1.9.12.jar jackson-core-asl-
+ 1.9.12.jar LS-domain.jar
 

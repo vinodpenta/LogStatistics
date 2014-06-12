@@ -90,5 +90,12 @@
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
 		</dependency>
+		
+		<!-- internal dependencies -->
+		<dependency>
+			<groupId>com.tcs.klm</groupId>
+			<artifactId>LS-domain</artifactId>
+			<version>${project.version}</version>
+		</dependency>
  	</dependencies>
 </project>

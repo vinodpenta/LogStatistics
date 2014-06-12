@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.tcs.klm</groupId>
 	<artifactId>LS-Web</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>LS-Web Maven Webapp</name>
 	<url>http://maven.apache.org</url>
@@ -55,6 +55,10 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+		</dependency>
 
 		<!-- mongodb java driver -->
 		<dependency>
@@ -78,6 +82,14 @@
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
+		
+		<!-- internal dependencies -->
+		<dependency>
+			<groupId>com.tcs.klm</groupId>
+			<artifactId>LS-domain</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 	
 	</dependencies>
 </project>

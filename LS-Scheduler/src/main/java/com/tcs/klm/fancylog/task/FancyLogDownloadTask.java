@@ -57,7 +57,9 @@ public class FancyLogDownloadTask {
 
             HttpClient httpClient = getAuthenticatedHttpClient(logInURL, userName, passWord);
 
-            Date today = Calendar.getInstance().getTime();
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.HOUR_OF_DAY, -3);
+            Date today = calendar.getTime();
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH");
             String date = formatter.format(today);
 
@@ -104,6 +106,7 @@ public class FancyLogDownloadTask {
                         System.out.println(hyperLink);
                         (new File(downloadLocation)).mkdirs();
                         String fileName = downloadLocation + hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
+                        fileName = fileName.replace(".gz", ".log.gz");
                         InputStream isTextOrTail = getMethodLog.getResponseBodyAsStream();
                         saveFileContent(isTextOrTail, fileName);
                         downloadSuccessFlag = true;

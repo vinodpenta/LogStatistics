@@ -22,30 +22,4 @@
 
 	<context:component-scan base-package="com.tcs.klm.web.services" />
 	<context:annotation-config/>
-
-
- 
-    <!-- Use this post processor to translate any MongoExceptions thrown in @Repository annotated classes -->
-  <!--   <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" /> -->
-  
-
-	<!-- <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" 
-		/> <jpa:repositories base-package="com.afklm.productadmin.repository"/> <bean 
-		id="jacksonMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"></bean> 
-		<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"> 
-		<property name="messageConverters"> <list> <ref bean="jacksonMessageConverter"/> 
-		</list> </property> </bean> <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"> 
-		<property name="locations"> <list> <value>classpath:jndi.properties</value> 
-		<value>classpath:application.properties</value> </list> </property> </bean> 
-		<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"> 
-		<property name="entityManagerFactory" ref="entityManagerFactory" /> </bean> 
-		<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
-		<property name="jndiName" value="${jndi.dataSource}"/> </bean> <bean id="entityManagerFactory" 
-		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"> 
-		<property name="dataSource" ref="dataSource" /> <property name="packagesToScan" 
-		value="com.afklm.productadmin.repository" /> <property name="jpaProperties"> 
-		<props> <prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop> 
-		<prop key="hibernate.show_sql">false</prop> </props> </property> <property 
-		name="persistenceProvider"> <bean class="org.hibernate.ejb.HibernatePersistence"/> 
-		</property> </bean> -->
 </beans>

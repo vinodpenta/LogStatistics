@@ -71,11 +71,17 @@
                 },
                 view: {
                 	title: '',
-                	width: '1%'
+                	width: '1%',
+					display : function(data) {
+						    	return '<a href="../config/searchLogs/logs?id='+data.record.sessionId+'"><span class="glyphicon glyphicon-open"></span></a>';
+						    }
                 },
                 download: {
                 	title: '',
-                	width: '1%'
+                	width: '1%',
+					display : function(data) {
+					    	return '<a href="../config/searchLogs/download?id='+data.record.sessionId+'"><span class="glyphicon glyphicon-save"></span></a>';
+					    }
                 }
             }/* ,
             //Register to selectionChanged event to hanlde events
