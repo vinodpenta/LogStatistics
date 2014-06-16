@@ -19,6 +19,7 @@ public class SettingsBean {
     private String userName;
     private String passWord;
     private String fileName;
+    private String downloadLocation;
 
     public String getId() {
         return id;
@@ -114,5 +115,13 @@ public class SettingsBean {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getDownloadLocation() {
+        return downloadLocation;
+    }
+
+    public void setDownloadLocation(String downloadLocation) {
+        this.downloadLocation = downloadLocation;
     }
 }

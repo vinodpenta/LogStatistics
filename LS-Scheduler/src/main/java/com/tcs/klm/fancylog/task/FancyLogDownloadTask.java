@@ -18,6 +18,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -104,6 +105,7 @@ public class FancyLogDownloadTask {
                         int fileNameBeginIndex = hyperLink.indexOf("oldlogs/") + "oldlogs/".length();
                         int fileNameEndIndex = hyperLink.indexOf("&app=");
                         System.out.println(hyperLink);
+                        System.out.println(downloadLocation);
                         (new File(downloadLocation)).mkdirs();
                         String fileName = downloadLocation + hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
                         fileName = fileName.replace(".gz", ".log.gz");
@@ -135,11 +137,9 @@ public class FancyLogDownloadTask {
         try {
 
             out = new FileOutputStream(targetFile);
-            byte[] buf = new byte[1024];
+            byte[] buf = new byte[8192];
             int len;
-            while ((len = isTextOrTail.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
+            IOUtils.copy(isTextOrTail, out);
         }
         catch (IOException ex) {
             ex.printStackTrace();
