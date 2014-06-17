@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,41 @@ public class DownloadThread implements Runnable {
         this.downloadLocation = downloadLocation;
         this.httpClient = httpClient;
         this.hyperLink = hyperLink;
+    }
+
+    public DownloadThread(String logInURL, String userName, String passWord, String hyperLink, String downloadLocation) {
+        this.downloadLocation = downloadLocation;
+        this.httpClient = getAuthenticatedHttpClient(logInURL, userName, passWord);
+        this.hyperLink = hyperLink;
+    }
+
+    private HttpClient getAuthenticatedHttpClient(String strLogonURL, String strLogonUserId, String strLogonPassword) {
+        HttpClient httpClient = new HttpClient();
+        int code = 0;
+        if (strLogonURL != null && strLogonUserId != null && strLogonPassword != null) {
+            PostMethod postMethod = new PostMethod(strLogonURL);
+            postMethod.setParameter("username", strLogonUserId);
+            postMethod.setParameter("password", strLogonPassword);
+            postMethod.setParameter("login-form-type", "pwd");
+            try {
+                code = httpClient.executeMethod(postMethod);
+                System.out.println("Login Http Status " + code);
+            }
+            catch (HttpException e) {
+                e.printStackTrace();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            System.err.println("invalid logon configurations found");
+        }
+        if (code != 200) {
+            System.out.println("Unable to login to server, Http Status Code = " + code);
+            httpClient = null;
+        }
+        return httpClient;
     }
 
     @Override
@@ -70,6 +106,7 @@ public class DownloadThread implements Runnable {
             while ((len = isTextOrTail.read(buf)) > 0) {
                 out.write(buf, 0, len);
             }
+            // IOUtils.copy(isTextOrTail, out);
         }
         catch (IOException ex) {
             ex.printStackTrace();

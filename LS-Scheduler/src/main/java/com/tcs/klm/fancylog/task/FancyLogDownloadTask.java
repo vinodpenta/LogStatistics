@@ -1,10 +1,6 @@
 package com.tcs.klm.fancylog.task;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,7 +14,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -26,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.tcs.klm.fancylog.thread.DownloadThread;
 import com.tcs.klm.fancylog.utils.FancySharedInfo;
 
 @Component(value = "fancyLogDownloadTask")
@@ -83,7 +79,7 @@ public class FancyLogDownloadTask {
                         }
                     }
                 }
-                isDownloadSuccess = starFileDownload(httpClient, lstHyeperLink, downloadLocation);
+                isDownloadSuccess = starFileDownload(logInURL, userName, passWord, lstHyeperLink, downloadLocation);
                 if (isDownloadSuccess) {
                     FancySharedInfo.getInstance().setDownloadInProgress(false);
                     FancySharedInfo.getInstance().setLastTaskSuccessful(true);
@@ -92,75 +88,41 @@ public class FancyLogDownloadTask {
         }
     }
 
-    private boolean starFileDownload(HttpClient httpClient, List<String> listHyeperLink, String downloadLocation) {
+    private boolean starFileDownload(String logInURL, String userName, String passWord, List<String> listHyeperLink, String downloadLocation) {
         boolean downloadSuccessFlag = false;
         if (listHyeperLink != null && !listHyeperLink.isEmpty()) {
-            System.out.println("Download Started...");
-            for (String hyperLink : listHyeperLink) {
-                GetMethod getMethodLog = new GetMethod(hyperLink);
-                try {
-                    int code = httpClient.executeMethod(getMethodLog);
-                    if (code == 200) {
-                        System.out.println("response code 200");
-                        int fileNameBeginIndex = hyperLink.indexOf("oldlogs/") + "oldlogs/".length();
-                        int fileNameEndIndex = hyperLink.indexOf("&app=");
-                        System.out.println(hyperLink);
-                        System.out.println(downloadLocation);
-                        (new File(downloadLocation)).mkdirs();
-                        String fileName = downloadLocation + hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
-                        fileName = fileName.replace(".gz", ".log.gz");
-                        InputStream isTextOrTail = getMethodLog.getResponseBodyAsStream();
-                        saveFileContent(isTextOrTail, fileName);
-                        downloadSuccessFlag = true;
-                    }
-                    else {
-                        System.out.println("failed to download log file " + hyperLink);
-                        System.out.println("Http Status Code : " + code);
-                    }
+            try {
+                Runnable task;
+                System.out.println("Download Started..." + System.nanoTime());
+                List<Thread> threads = new ArrayList<Thread>();
+                /*
+                 * ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor(); taskExecutor.setCorePoolSize(4); taskExecutor.setMaxPoolSize(20); taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+                 */
+                for (String hyperLink : listHyeperLink) {
+                    task = new DownloadThread(logInURL, userName, passWord, hyperLink, downloadLocation);
+                    Thread thread = new Thread(task);
+                    thread.start();
+                    threads.add(thread);
+                    // taskExecutor.execute(task);
                 }
-                catch (HttpException e) {
-                    e.printStackTrace();
+                for (Thread thread : threads) {
+
+                    thread.join();
+
                 }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
+                // check active thread, if zero then shut down the thread pool
+                /*
+                 * for (;;) { int count = taskExecutor.getActiveCount(); System.out.println("Active Threads : " + count); try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); } if (count ==
+                 * 0) { taskExecutor.shutdown(); break; } }
+                 */
+            }
+            catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
-        System.out.println("Download Completed...  >> " + downloadSuccessFlag);
+        System.out.println("Download Completed...  >> " + System.nanoTime());
         return downloadSuccessFlag;
-    }
-
-    private void saveFileContent(InputStream isTextOrTail, String fileName) {
-        OutputStream out = null;
-        File targetFile = new File(fileName);
-        System.out.println("Downloading file " + targetFile.getPath());
-        try {
-
-            out = new FileOutputStream(targetFile);
-            byte[] buf = new byte[8192];
-            int len;
-            IOUtils.copy(isTextOrTail, out);
-        }
-        catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        finally {
-            if (isTextOrTail != null) {
-                try {
-                    isTextOrTail.close();
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            if (out != null) {
-                try {
-                    out.close();
-                }
-                catch (IOException ex) {
-                }
-            }
-        }
     }
 
     private boolean isValid(String logFileURL, String fileName, String date) {
