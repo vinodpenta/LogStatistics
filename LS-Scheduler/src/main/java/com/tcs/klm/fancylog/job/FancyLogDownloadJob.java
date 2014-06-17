@@ -14,6 +14,7 @@ public class FancyLogDownloadJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
+        	System.out.println("FancyLogDownloadJob");
             if (FancySharedInfo.getInstance().isLastTaskSuccessful()) {
                 if (!FancySharedInfo.getInstance().isAnalysisInProgress()) {
                     fancyLogDownloadTask.performTask();

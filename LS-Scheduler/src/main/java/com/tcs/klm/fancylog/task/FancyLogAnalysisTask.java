@@ -52,6 +52,7 @@ public class FancyLogAnalysisTask {
     private static Map<String, List<String>> map = new HashMap<String, List<String>>();
 
     public void performTask() throws IOException {
+    	System.out.println("FancyLogAnalysisTask"+System.currentTimeMillis());
         FancySharedInfo.getInstance().setAnalysisInProgress(true);
         DBCollection settingsCollection = mongoTemplate.getCollection(COLLECTION_SETTINGS);
         DBCursor settingsCursor = settingsCollection.find();
@@ -70,7 +71,8 @@ public class FancyLogAnalysisTask {
             }
             String sessionIDPossition = (String) settings.get("sessionIdPosition");
             String gzFileLocation = (String) settings.get("downloadLocation");
-            String tempFileLocation = gzFileLocation + "temp/";
+            String[] names = StringUtils.split(gzFileLocation, "/");
+            String tempFileLocation = gzFileLocation.replace(names[names.length - 1], "temp");
             File[] files = getListOfFiles(gzFileLocation);
             (new File(tempFileLocation)).mkdirs();
             StringBuffer sbf = null;
@@ -97,8 +99,10 @@ public class FancyLogAnalysisTask {
                     }
                     br.close();
                 }
+                tmpFile.delete();
             }
         }
+        System.out.println("FancyLogAnalysisTask end"+System.currentTimeMillis());
     }
 
     private void processLastLine(String lineText, String sessionIDPossition, String year, String fileName) throws IOException {
@@ -116,11 +120,13 @@ public class FancyLogAnalysisTask {
                         StringBuffer sbfTemp = new StringBuffer();
                         sbfTemp.append(fileName).append("\n");
                         sbfTemp.append(lineText).append("\n");
+                        for (LogKey logKey : logKeys) {
+                            //lstTmpsessionIdUPR.put(logKey.getPassengerId(), sessionID);
+                        	logKey.setSessionID(sessionID);
+                        }
                         lstTempLogs.put(sessionID, sbfTemp);
                         lstTmpKeys.put(sessionID, logKeys);
-                        for (LogKey logKey : logKeys) {
-                            lstTmpsessionIdUPR.put(logKey.getPassengerId(), sessionID);
-                        }
+                        
 
                     }
                 }
@@ -138,7 +144,7 @@ public class FancyLogAnalysisTask {
                             for (LogKey logKey : logKeys) {
                                 logKey.setErrorCode(responseLogKey.getErrorCode());
                                 logKey.setErrorDescription(responseLogKey.getErrorDescription());
-                                lstTmpsessionIdUPR.remove(logKey.getPassengerId());
+                                //lstTmpsessionIdUPR.remove(logKey.getPassengerId());
                             }
                         }
                     }
@@ -151,9 +157,8 @@ public class FancyLogAnalysisTask {
                     DBObject dBObjectLog = new BasicDBObject();
                     dBObjectLog.put("log", compressedLog);
                     dbCollectionLog.insert(dBObjectLog);
-                    ObjectId id = (ObjectId) dBObjectLog.get("_ID");
-                    String logID = id.toString();
-
+                    String logID = dBObjectLog.get("_id").toString();
+                    
                     List<LogKey> logKeys = lstTmpKeys.get(sessionID);
                     for (LogKey key : logKeys) {
                         key.setLogID(logID);
@@ -162,13 +167,13 @@ public class FancyLogAnalysisTask {
 
                     lstTmpKeys.remove(sessionID);
                     lstTempLogs.remove(sessionID);
-                    List<String> wmSessionIDs = map.get(sessionID);
+                    /*List<String> wmSessionIDs = map.get(sessionID);
                     if (wmSessionIDs != null) {
                         for (String wmSessionID : wmSessionIDs) {
-                            lstTmpsessionMap.remove(wmSessionID);
+                            //lstTmpsessionMap.remove(wmSessionID);
                         }
-                    }
-                    map.remove(sessionID);
+                    }*/
+                    //map.remove(sessionID);
                 }
                 else {
                     lstTmpKeys.remove(sessionID);
@@ -177,10 +182,10 @@ public class FancyLogAnalysisTask {
             }
             else if (lineText.contains(".CONSUMER_RE")) {
                 sessionID = getSessionID(lineText, sessionIDPossition);
-                Set<String> keySet = lstTmpsessionMap.keySet();
+                //Set<String> keySet = lstTmpsessionMap.keySet();
                 if (lstTmpKeys.containsKey(sessionID)) {
                     lstTempLogs.get(sessionID).append(lineText).append("\n");
-                    if (lineText.contains("GetEticketDetails.CONSUMER_RESPONSE")) {
+                    /*if (lineText.contains("GetEticketDetails.CONSUMER_RESPONSE")) {
                         serviceName = getServiceName(xmlPayload);
                         LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                         LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload);
@@ -190,14 +195,14 @@ public class FancyLogAnalysisTask {
                                 logKey.setPNR(responseLogKey.getPNR());
                             }
                         }
-                    }
+                    }*/
                 }
-                else if (keySet.contains(sessionID)) {
+                /*else if (keySet.contains(sessionID)) {
                     String flowSessionId = lstTmpsessionMap.get(sessionID);
                     if (lstTempLogs.get(flowSessionId) != null)
                         lstTempLogs.get(flowSessionId).append(lineText).append("\n");
-                }
-                else {
+                }*/
+/*                else {
                     String passengerId = getPassengerId(lineText);
                     if (passengerId != null) {
                         String flowSessionId = lstTmpsessionIdUPR.get(passengerId);
@@ -214,7 +219,7 @@ public class FancyLogAnalysisTask {
                             }
                         }
                     }
-                }
+                }*/
 
             }
         }
@@ -274,8 +279,10 @@ public class FancyLogAnalysisTask {
             GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(file));
             String fileName = file.getName();
             fileName = fileName.replace("gz", "log");
+            System.out.println(tempFileLocation);
             String unzipfilepath = tempFileLocation + fileName;
-            FileOutputStream out = new FileOutputStream(tempFileLocation);
+            System.out.println(unzipfilepath);
+            FileOutputStream out = new FileOutputStream(unzipfilepath);
             byte[] buffer = new byte[1024];
             int len;
             while ((len = gzis.read(buffer)) > 0) {

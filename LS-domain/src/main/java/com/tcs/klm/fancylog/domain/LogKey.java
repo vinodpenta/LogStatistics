@@ -12,6 +12,7 @@ public class LogKey {
     private String passengerId;
     private String date;
     private String logID;
+    private String sessionID;
 
     public String getPNR() {
         return PNR;
@@ -92,5 +93,13 @@ public class LogKey {
     public void setLogID(String logID) {
         this.logID = logID;
     }
+
+	public String getSessionID() {
+		return sessionID;
+	}
+
+	public void setSessionID(String sessionID) {
+		this.sessionID = sessionID;
+	}
 
 }

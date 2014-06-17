@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -29,22 +31,48 @@ public class SearchLogsService {
     private String COLLECTION_LOGS = "logs";
 
     public List<LogKey> searchResults(String pnr) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("pnr").is(pnr));
-        List<LogKey> logKeys = mongoTemplate.find(query, LogKey.class);
+//        Query query = new Query();
+//        query.addCriteria(Criteria.where("PNR").is(pnr));
+        BasicDBObject searchQuery = new BasicDBObject();
+    	searchQuery.put("PNR",pnr);
+        DBCollection collection = mongoTemplate.getCollection(COLLECTION_TRANSACTION);
+        DBCursor cursor = collection.find(searchQuery);
+        List<LogKey> logKeys = new ArrayList<LogKey>();
+        while (cursor.hasNext()) {
+        	DBObject object = cursor.next();
+        	LogKey logKey = new LogKey();
+        	logKey.setChannel((String)object.get("channel"));
+        	logKey.setPNR((String)object.get("PNR"));
+        	logKey.setServiceName((String)object.get("serviceName"));
+        	logKey.setHost((String)object.get("host"));
+        	logKey.setMarket((String)object.get("market"));
+        	Object value = object.get("sessionID");
+        	if(value!=null)
+        		logKey.setSessionID(value.toString());
+        	logKeys.add(logKey);
+        }
         return logKeys;
     }
 
     public String getLogs(String id) throws IOException {
-        DBCollection dbCollection = mongoTemplate.getCollection(COLLECTION_LOGS);
+        DBCollection dbCollection = mongoTemplate.getCollection(COLLECTION_TRANSACTION);
         BasicDBObject query = new BasicDBObject();
-        query.put("_id", id);
+        query.put("sessionID", id);
         DBCursor cursor = dbCollection.find(query);
         while (cursor.hasNext()) {
             DBObject object = cursor.next();
-            String compressedLog = (String) object.get("log");
-            String log = decompress(compressedLog);
-            return log;
+            String compressedLogID = (String) object.get("logID");
+            DBCollection dbCollectionlog = mongoTemplate.getCollection(COLLECTION_LOGS);
+            BasicDBObject querylog = new BasicDBObject();
+            querylog.put("_id", new ObjectId(compressedLogID));
+            DBCursor cursorlog = dbCollection.find(querylog);
+            while (cursorlog.hasNext()) {
+            	DBObject objectlog = cursor.next();
+            	String compressedLog = (String) objectlog.get("_id");
+            	String log = decompress(compressedLog);
+                return log;
+            }
+            
         }
         return null;
     }

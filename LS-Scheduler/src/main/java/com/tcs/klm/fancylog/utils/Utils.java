@@ -18,8 +18,8 @@ public class Utils {
     public static String extractXPATHSource(String xmlPayloadSource) throws TransformerConfigurationException, TransformerFactoryConfigurationError, TransformerException {
         String leftXPATHSource = null;
         if (xmlPayloadSource != null) {
-            StringWriter writerNamespaceremoved = applyXSLTransformation(xmlPayloadSource, "D:\\dev\\tools\\removenamespace.xsl");
-            StringWriter writer = applyXSLTransformation(writerNamespaceremoved.toString(), "D:\\dev\\tools\\xpath.xsl");
+            StringWriter writerNamespaceremoved = applyXSLTransformation(xmlPayloadSource, "C:\\dev\\tools\\removenamespace.xsl");
+            StringWriter writer = applyXSLTransformation(writerNamespaceremoved.toString(), "C:\\dev\\tools\\xpath.xsl");
             leftXPATHSource = writer.toString();
 
         }
@@ -29,7 +29,7 @@ public class Utils {
     public static String removeNameSpace(String xmlPayload) throws TransformerConfigurationException, TransformerFactoryConfigurationError, TransformerException {
         String leftXPATHSource = null;
         if (xmlPayload != null) {
-            StringWriter writerNamespaceremoved = applyXSLTransformation(xmlPayload, "D:\\dev\\tools\\removenamespace.xsl");
+            StringWriter writerNamespaceremoved = applyXSLTransformation(xmlPayload, "C:\\dev\\tools\\removenamespace.xsl");
             leftXPATHSource = writerNamespaceremoved.toString();
 
         }

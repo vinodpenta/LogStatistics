@@ -33,8 +33,10 @@ public class FancyLogDownloadTask {
     public static final String COLLECTION_NAME = "settings";
 
     public void performTask() {
+    	//System.out.println("FancyLogDownloadTask");
         FancySharedInfo.getInstance().setDownloadInProgress(true);
         DBCollection dbCollection = mongoTemplate.getCollection(COLLECTION_NAME);
+        //System.out.println(dbCollection.getName());
         DBCursor dbCursor = dbCollection.find();
         while (dbCursor.hasNext()) {
             boolean isDownloadSuccess = false;
@@ -80,10 +82,9 @@ public class FancyLogDownloadTask {
                     }
                 }
                 isDownloadSuccess = starFileDownload(logInURL, userName, passWord, lstHyeperLink, downloadLocation);
-                if (isDownloadSuccess) {
-                    FancySharedInfo.getInstance().setDownloadInProgress(false);
-                    FancySharedInfo.getInstance().setLastTaskSuccessful(true);
-                }
+                FancySharedInfo.getInstance().setDownloadInProgress(false);
+                FancySharedInfo.getInstance().setLastTaskSuccessful(true);
+
             }
         }
     }
@@ -93,7 +94,7 @@ public class FancyLogDownloadTask {
         if (listHyeperLink != null && !listHyeperLink.isEmpty()) {
             try {
                 Runnable task;
-                System.out.println("Download Started..." + System.nanoTime());
+                System.out.println("Download Started..." + System.currentTimeMillis());
                 List<Thread> threads = new ArrayList<Thread>();
                 /*
                  * ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor(); taskExecutor.setCorePoolSize(4); taskExecutor.setMaxPoolSize(20); taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
@@ -121,7 +122,7 @@ public class FancyLogDownloadTask {
                 e.printStackTrace();
             }
         }
-        System.out.println("Download Completed...  >> " + System.nanoTime());
+        System.out.println("Download Completed...  >> " + System.currentTimeMillis());
         return downloadSuccessFlag;
     }
 
