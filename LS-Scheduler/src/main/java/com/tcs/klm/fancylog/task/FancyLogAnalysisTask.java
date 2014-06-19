@@ -6,16 +6,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.lang.StringUtils;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -47,12 +44,12 @@ public class FancyLogAnalysisTask {
     private static Map<String, StringBuffer> lstTempLogs = new HashMap<String, StringBuffer>();
     private static Map<String, List<LogKey>> lstTmpKeys = new HashMap<String, List<LogKey>>();
 
-    private static Map<String, String> lstTmpsessionIdUPR = new HashMap<String, String>();
-    private static Map<String, String> lstTmpsessionMap = new HashMap<String, String>();
-    private static Map<String, List<String>> map = new HashMap<String, List<String>>();
+    // private static Map<String, String> lstTmpsessionIdUPR = new HashMap<String, String>();
+    // private static Map<String, String> lstTmpsessionMap = new HashMap<String, String>();
+    // private static Map<String, List<String>> map = new HashMap<String, List<String>>();
 
     public void performTask() throws IOException {
-    	System.out.println("FancyLogAnalysisTask"+System.currentTimeMillis());
+        System.out.println("FancyLogAnalysisTask" + System.currentTimeMillis());
         FancySharedInfo.getInstance().setAnalysisInProgress(true);
         DBCollection settingsCollection = mongoTemplate.getCollection(COLLECTION_SETTINGS);
         DBCursor settingsCursor = settingsCollection.find();
@@ -60,7 +57,7 @@ public class FancyLogAnalysisTask {
         String year = calendar.get(Calendar.YEAR) + "";
         while (settingsCursor.hasNext()) {
             DBObject settings = settingsCursor.next();
-            String applicationName = (String) settings.get("applicationName");
+            // String applicationName = (String) settings.get("applicationName");
             COLLECTION_TRANSACTION = "transactions";
             COLLECTION_LOGS = "logs";
             if (!mongoTemplate.collectionExists(COLLECTION_LOGS)) {
@@ -101,8 +98,27 @@ public class FancyLogAnalysisTask {
                 }
                 tmpFile.delete();
             }
+            File gzfolder = new File(gzFileLocation);
+            deleteDirectory(gzfolder);
         }
-        System.out.println("FancyLogAnalysisTask end"+System.currentTimeMillis());
+        System.out.println("FancyLogAnalysisTask end" + System.currentTimeMillis());
+    }
+
+    public static boolean deleteDirectory(File directory) {
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            if (null != files) {
+                for (int i = 0; i < files.length; i++) {
+                    if (files[i].isDirectory()) {
+                        deleteDirectory(files[i]);
+                    }
+                    else {
+                        files[i].delete();
+                    }
+                }
+            }
+        }
+        return (directory.delete());
     }
 
     private void processLastLine(String lineText, String sessionIDPossition, String year, String fileName) throws IOException {
@@ -121,12 +137,11 @@ public class FancyLogAnalysisTask {
                         sbfTemp.append(fileName).append("\n");
                         sbfTemp.append(lineText).append("\n");
                         for (LogKey logKey : logKeys) {
-                            //lstTmpsessionIdUPR.put(logKey.getPassengerId(), sessionID);
-                        	logKey.setSessionID(sessionID);
+                            // lstTmpsessionIdUPR.put(logKey.getPassengerId(), sessionID);
+                            logKey.setSessionID(sessionID);
                         }
                         lstTempLogs.put(sessionID, sbfTemp);
                         lstTmpKeys.put(sessionID, logKeys);
-                        
 
                     }
                 }
@@ -144,7 +159,7 @@ public class FancyLogAnalysisTask {
                             for (LogKey logKey : logKeys) {
                                 logKey.setErrorCode(responseLogKey.getErrorCode());
                                 logKey.setErrorDescription(responseLogKey.getErrorDescription());
-                                //lstTmpsessionIdUPR.remove(logKey.getPassengerId());
+                                // lstTmpsessionIdUPR.remove(logKey.getPassengerId());
                             }
                         }
                     }
@@ -158,7 +173,7 @@ public class FancyLogAnalysisTask {
                     dBObjectLog.put("log", compressedLog);
                     dbCollectionLog.insert(dBObjectLog);
                     String logID = dBObjectLog.get("_id").toString();
-                    
+
                     List<LogKey> logKeys = lstTmpKeys.get(sessionID);
                     for (LogKey key : logKeys) {
                         key.setLogID(logID);
@@ -167,13 +182,10 @@ public class FancyLogAnalysisTask {
 
                     lstTmpKeys.remove(sessionID);
                     lstTempLogs.remove(sessionID);
-                    /*List<String> wmSessionIDs = map.get(sessionID);
-                    if (wmSessionIDs != null) {
-                        for (String wmSessionID : wmSessionIDs) {
-                            //lstTmpsessionMap.remove(wmSessionID);
-                        }
-                    }*/
-                    //map.remove(sessionID);
+                    /*
+                     * List<String> wmSessionIDs = map.get(sessionID); if (wmSessionIDs != null) { for (String wmSessionID : wmSessionIDs) { //lstTmpsessionMap.remove(wmSessionID); } }
+                     */
+                    // map.remove(sessionID);
                 }
                 else {
                     lstTmpKeys.remove(sessionID);
@@ -182,59 +194,39 @@ public class FancyLogAnalysisTask {
             }
             else if (lineText.contains(".CONSUMER_RE")) {
                 sessionID = getSessionID(lineText, sessionIDPossition);
-                //Set<String> keySet = lstTmpsessionMap.keySet();
+                // Set<String> keySet = lstTmpsessionMap.keySet();
                 if (lstTmpKeys.containsKey(sessionID)) {
                     lstTempLogs.get(sessionID).append(lineText).append("\n");
-                    /*if (lineText.contains("GetEticketDetails.CONSUMER_RESPONSE")) {
-                        serviceName = getServiceName(xmlPayload);
-                        LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
-                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload);
-                        if (responseLogKey != null) {
-                            List<LogKey> logKeys = lstTmpKeys.get(sessionID);
-                            for (LogKey logKey : logKeys) {
-                                logKey.setPNR(responseLogKey.getPNR());
-                            }
-                        }
-                    }*/
+                    /*
+                     * if (lineText.contains("GetEticketDetails.CONSUMER_RESPONSE")) { serviceName = getServiceName(xmlPayload); LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName); LogKey responseLogKey =
+                     * logAnalyzer.getLogKeyFromResponse(xmlPayload); if (responseLogKey != null) { List<LogKey> logKeys = lstTmpKeys.get(sessionID); for (LogKey logKey : logKeys) {
+                     * logKey.setPNR(responseLogKey.getPNR()); } } }
+                     */
                 }
-                /*else if (keySet.contains(sessionID)) {
-                    String flowSessionId = lstTmpsessionMap.get(sessionID);
-                    if (lstTempLogs.get(flowSessionId) != null)
-                        lstTempLogs.get(flowSessionId).append(lineText).append("\n");
-                }*/
-/*                else {
-                    String passengerId = getPassengerId(lineText);
-                    if (passengerId != null) {
-                        String flowSessionId = lstTmpsessionIdUPR.get(passengerId);
-                        if (lstTempLogs.get(flowSessionId) != null) {
-                            lstTempLogs.get(flowSessionId).append(lineText).append("\n");
-                            lstTmpsessionMap.put(sessionID, flowSessionId);
-                            if (map.containsKey(flowSessionId)) {
-                                map.get(flowSessionId).add(sessionID);
-                            }
-                            else {
-                                List<String> wmSessionIDs = new ArrayList<String>();
-                                wmSessionIDs.add(sessionID);
-                                map.put(flowSessionId, wmSessionIDs);
-                            }
-                        }
-                    }
-                }*/
+                /*
+                 * else if (keySet.contains(sessionID)) { String flowSessionId = lstTmpsessionMap.get(sessionID); if (lstTempLogs.get(flowSessionId) != null) lstTempLogs.get(flowSessionId).append(lineText).append("\n");
+                 * }
+                 */
+                /*
+                 * else { String passengerId = getPassengerId(lineText); if (passengerId != null) { String flowSessionId = lstTmpsessionIdUPR.get(passengerId); if (lstTempLogs.get(flowSessionId) != null) {
+                 * lstTempLogs.get(flowSessionId).append(lineText).append("\n"); lstTmpsessionMap.put(sessionID, flowSessionId); if (map.containsKey(flowSessionId)) { map.get(flowSessionId).add(sessionID); } else {
+                 * List<String> wmSessionIDs = new ArrayList<String>(); wmSessionIDs.add(sessionID); map.put(flowSessionId, wmSessionIDs); } } } }
+                 */
 
             }
         }
     }
 
-    private String getPassengerId(String lineText) {
-        String passengerId = null;
-        try {
-            passengerId = lineText.substring(lineText.indexOf("<ns3:uniquePassengerReference>") + "<ns3:uniquePassengerReference>".length(), lineText.indexOf("</ns3:uniquePassengerReference>"));
-        }
-        catch (IndexOutOfBoundsException e) {
-            return null;
-        }
-        return passengerId;
-    }
+    // private String getPassengerId(String lineText) {
+    // String passengerId = null;
+    // try {
+    // passengerId = lineText.substring(lineText.indexOf("<ns3:uniquePassengerReference>") + "<ns3:uniquePassengerReference>".length(), lineText.indexOf("</ns3:uniquePassengerReference>"));
+    // }
+    // catch (IndexOutOfBoundsException e) {
+    // return null;
+    // }
+    // return passengerId;
+    // }
 
     private String getServiceName(String xmlPayload) {
         String serviceName = null;
@@ -305,9 +297,9 @@ public class FancyLogAnalysisTask {
         return listOfFiles;
     }
 
-    private String getCollectionName() {
-        Calendar calendar = Calendar.getInstance();
-        String collectionName = calendar.get(Calendar.YEAR) + StringUtils.leftPad("" + (calendar.get(Calendar.MONTH) + 1), 2, "0") + StringUtils.leftPad("" + calendar.get(Calendar.DATE), 2, "0");
-        return collectionName;
-    }
+    // private String getCollectionName() {
+    // Calendar calendar = Calendar.getInstance();
+    // String collectionName = calendar.get(Calendar.YEAR) + StringUtils.leftPad("" + (calendar.get(Calendar.MONTH) + 1), 2, "0") + StringUtils.leftPad("" + calendar.get(Calendar.DATE), 2, "0");
+    // return collectionName;
+    // }
 }
