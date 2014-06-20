@@ -224,7 +224,8 @@ public class FancyLogAnalysisTask {
 
     private String getDate(String line) {
         String dateString = null;
-        if (line.startsWith("2014-")) {
+        Calendar calendar = Calendar.getInstance();
+        if (line.startsWith(calendar.get(Calendar.YEAR) + "")) {
             String strs[] = line.split(" ");
             dateString = strs[0] + " " + strs[1];// line.substring(24, 47);
         }

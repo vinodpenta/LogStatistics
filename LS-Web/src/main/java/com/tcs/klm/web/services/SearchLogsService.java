@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -81,11 +82,20 @@ public class SearchLogsService {
                 DBObject objectlog = cursorlog.next();
                 String compressedLog = (String) objectlog.get("log");
                 String log = decompress(compressedLog);
-                return log;
+                String modifyedLog = formatLog(log);
+                return modifyedLog;
             }
 
         }
         return null;
+    }
+
+    private String formatLog(String log) {
+        Calendar calendar = Calendar.getInstance();
+        String year = calendar.get(Calendar.YEAR) + "";
+        String formattedLog = log.replaceAll("log.gz" + year + "-", "log.gz\n\n" + year + "-");
+        formattedLog = formattedLog.replaceAll("Envelope>" + year + "-", "Envelope>\n" + year + "-");
+        return formattedLog;
     }
 
     private String decompress(String str) throws IOException {
