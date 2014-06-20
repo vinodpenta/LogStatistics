@@ -104,6 +104,8 @@ public class FancyLogAnalysisTask {
             }
 
         }
+        FancySharedInfo.getInstance().setAnalysisInProgress(false);
+        FancySharedInfo.getInstance().setLastTaskSuccessful(true);
         System.out.println("FancyLogAnalysisTask end" + System.currentTimeMillis());
     }
 
