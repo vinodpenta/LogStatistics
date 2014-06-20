@@ -7,6 +7,8 @@
 <title>logs</title>
 </head>
 <body>
-	<c:out value="${logs}" /> 
+<pre>
+<c:out value="${logs}" /> 
+</pre>
 </body>
 </html>
