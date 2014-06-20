@@ -1,11 +1,14 @@
 Manifest-Version: 1.0
 Class-Path: spring-core-3.2.3.RELEASE.jar commons-logging-1.1.1.jar sp
- ring-context-3.2.3.RELEASE.jar spring-aop-3.2.3.RELEASE.jar aopallian
- ce-1.0.jar spring-beans-3.2.3.RELEASE.jar spring-expression-3.2.3.REL
- EASE.jar spring-web-3.2.3.RELEASE.jar spring-webmvc-3.2.3.RELEASE.jar
-  servlet-api-2.5.jar mongo-java-driver-2.11.0.jar spring-data-mongodb
- -1.2.0.RELEASE.jar spring-tx-3.2.3.RELEASE.jar spring-data-commons-1.
- 5.0.RELEASE.jar slf4j-api-1.7.1.jar jcl-over-slf4j-1.7.1.jar cglib-2.
- 2.2.jar asm-3.3.1.jar jackson-mapper-asl-1.9.12.jar jackson-core-asl-
- 1.9.12.jar LS-domain.jar
+ ring-aspects-3.2.3.RELEASE.jar aspectjweaver-1.7.2.jar spring-context
+ -support-3.2.3.RELEASE.jar spring-beans-3.2.3.RELEASE.jar spring-cont
+ ext-3.2.3.RELEASE.jar spring-aop-3.2.3.RELEASE.jar aopalliance-1.0.ja
+ r spring-expression-3.2.3.RELEASE.jar spring-web-3.2.3.RELEASE.jar sp
+ ring-webmvc-3.2.3.RELEASE.jar servlet-api-2.5.jar mongo-java-driver-2
+ .11.0.jar spring-data-mongodb-1.2.0.RELEASE.jar spring-tx-3.2.3.RELEA
+ SE.jar spring-data-commons-1.5.0.RELEASE.jar slf4j-api-1.7.1.jar jcl-
+ over-slf4j-1.7.1.jar cglib-2.2.2.jar asm-3.3.1.jar jackson-mapper-asl
+ -1.9.12.jar jackson-core-asl-1.9.12.jar LS-domain.jar jstl-1.2.jar st
+ andard-1.1.2.jar displaytag-1.1.jar commons-collections-3.1.jar commo
+ ns-lang-2.6.jar itext-1.3.jar commons-beanutils-1.7.0.jar
 

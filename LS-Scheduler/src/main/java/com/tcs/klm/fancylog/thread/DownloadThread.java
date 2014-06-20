@@ -4,14 +4,12 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -103,12 +101,14 @@ public class DownloadThread implements Runnable {
         try {
 
             out = new FileOutputStream(targetFile);
-            byte[] buf = new byte[32*1024];
+            byte[] buf = new byte[32 * 1024];
             int len;
+
             while ((len = isTextOrTail.read(buf)) > 0) {
                 out.write(buf, 0, len);
             }
-            //IOUtils.copy(isTextOrTail, out);
+
+            // IOUtils.copy(isTextOrTail, out);
         }
         catch (IOException ex) {
             ex.printStackTrace();

@@ -32,55 +32,61 @@
         $('#FancyLogContainer').jtable({
             title: ' Fancy logs',
             paging: true,
-            defaultSorting: 'Date ASC',
+            sorting: true,
+            defaultSorting: 'date ASC',
             selecting: true, //Enable selecting
             multiselect: true, //Allow multiple selecting
-            selectingCheckboxes: true, //Show checkboxes on first column
+            //selectingCheckboxes: true, //Show checkboxes on first column
             //selectOnRowClick: false, //Enable this to only select using checkboxes
             actions: {
                 listAction: '../config/searchLogs',
             },
             fields: {
-                sessionId: {
+                /* sessionID: {
                     key: true,
                     edit: false,
-                    list: false
-                },
+                    //list: false
+                }, */
                 date: {
                     title: 'Record Date',
-                    width: '20%'
+                    width: '7%'
                 },
                 serviceName: {
                     title: 'Service name',
-                    width: '20%'
+                    width: '8%'
                 },
                 host: {
-                	title: 'Host'
+                	title: 'Host',
+                	width: '3%'
                 },
                 market: {
-                	title: 'Market'
+                	title: 'Market',
+                	width: '3%'
                 },
                 channel: {
-                	title:'Channel'
+                	title:'Channel',
+                	width: '3%'
                 },
                 errorCode: {
-                    title: 'Error Code'
+                    title: 'Error Code',
+                    width: '5%'
                 },
                 error: {
-                    title: 'Error Description(If any)'
+                    title: 'Error Description(If any)',
+                    width: '15%'
                 },
                 view: {
-                	title: '',
+                	title: ' ',
                 	width: '1%',
 					display : function(data) {
-						    	return '<a href="../config/searchLogs/logs?id='+data.record.sessionId+'"><span class="glyphicon glyphicon-open"></span></a>';
+						    	return '<a href="../config/searchLogs/logs?id='+data.record.sessionID+'"><span class="glyphicon glyphicon-open"></span></a>';
 						    }
                 },
                 download: {
-                	title: '',
+                	title: ' ',
                 	width: '1%',
 					display : function(data) {
-					    	return '<a href="../config/searchLogs/download?id='+data.record.sessionId+'"><span class="glyphicon glyphicon-save"></span></a>';
+					    	return '<a href="../config/searchLogs/download?id='+data.record.sessionID+'"><span class="glyphicon glyphicon-save"></span></a>';
 					    }
                 }
             }/* ,
