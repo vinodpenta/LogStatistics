@@ -1,5 +1,6 @@
 package com.tcs.klm.fancylog.thread;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -77,7 +78,7 @@ public class DownloadThread implements Runnable {
                 (new File(downloadLocation)).mkdirs();
                 String fileName = downloadLocation + hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
                 fileName = fileName.replace(".gz", ".log.gz");
-                InputStream isTextOrTail = getMethodLog.getResponseBodyAsStream();
+                BufferedInputStream isTextOrTail = new BufferedInputStream(getMethodLog.getResponseBodyAsStream());
                 saveFileContent(isTextOrTail, fileName);
                 // downloadSuccessFlag = true;
             }
@@ -95,7 +96,7 @@ public class DownloadThread implements Runnable {
 
     }
 
-    private void saveFileContent(InputStream isTextOrTail, String fileName) {
+    private void saveFileContent(BufferedInputStream isTextOrTail, String fileName) {
         OutputStream out = null;
         File targetFile = new File(fileName);
         System.out.println("Downloading file " + targetFile.getPath());
@@ -104,10 +105,10 @@ public class DownloadThread implements Runnable {
             out = new FileOutputStream(targetFile);
             byte[] buf = new byte[32*1024];
             int len;
-            /*while ((len = isTextOrTail.read(buf)) > 0) {
+            while ((len = isTextOrTail.read(buf)) > 0) {
                 out.write(buf, 0, len);
-            }*/
-            IOUtils.copy(isTextOrTail, out);
+            }
+            //IOUtils.copy(isTextOrTail, out);
         }
         catch (IOException ex) {
             ex.printStackTrace();

@@ -51,7 +51,7 @@ public class FancyLogAnalysisTask {
     private static Map<String, String> lstTmpsessionMap = new HashMap<String, String>();
     private static Map<String, List<String>> map = new HashMap<String, List<String>>();
 
-    public void performTask() throws IOException {
+    public void performTask(){
     	System.out.println("FancyLogAnalysisTask"+System.currentTimeMillis());
         FancySharedInfo.getInstance().setAnalysisInProgress(true);
         DBCollection settingsCollection = mongoTemplate.getCollection(COLLECTION_SETTINGS);
@@ -78,32 +78,55 @@ public class FancyLogAnalysisTask {
             StringBuffer sbf = null;
             String sCurrentLine = null;
             for (File file : files) {
-                File tmpFile = getUnZipedFile(file, tempFileLocation);
-                if (tmpFile != null) {
-                    BufferedReader br = new BufferedReader(new FileReader(tmpFile));
-                    sbf = new StringBuffer();
-                    while ((sCurrentLine = br.readLine()) != null) {
-                        if (sCurrentLine.startsWith(year)) {
-                            try {
-                                processLastLine(sbf.toString(), sessionIDPossition, year, file.getName());
+            	try{
+                    File tmpFile = getUnZipedFile(file, tempFileLocation);
+                    if (tmpFile != null) {
+                        BufferedReader br = new BufferedReader(new FileReader(tmpFile));
+                        sbf = new StringBuffer();
+                        while ((sCurrentLine = br.readLine()) != null) {
+                            if (sCurrentLine.startsWith(year)) {
+                                try {
+                                    processLastLine(sbf.toString(), sessionIDPossition, year, file.getName());
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                sbf.delete(0, sbf.length());
+                                sbf.append(sCurrentLine);
                             }
-                            catch (Exception e) {
-                                e.printStackTrace();
+                            else {
+                                sbf.append(sCurrentLine);
                             }
-                            sbf.delete(0, sbf.length());
-                            sbf.append(sCurrentLine);
                         }
-                        else {
-                            sbf.append(sCurrentLine);
-                        }
+                        br.close();
                     }
-                    br.close();
-                }
-                tmpFile.delete();
+                    tmpFile.delete();
+                } catch (Exception e) {
+					// TODO: handle exception
+				}
             }
+            File gzfolder = new File(gzFileLocation);
+            deleteDirectory(gzfolder);
         }
         System.out.println("FancyLogAnalysisTask end"+System.currentTimeMillis());
     }
+    public static boolean deleteDirectory(File directory) {
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            if (null != files) {
+                for (int i = 0; i < files.length; i++) {
+                    if (files[i].isDirectory()) {
+                        deleteDirectory(files[i]);
+                    }
+                    else {
+                        files[i].delete();
+                    }
+                }
+            }
+        }
+        return (directory.delete());
+    }
+
 
     private void processLastLine(String lineText, String sessionIDPossition, String year, String fileName) throws IOException {
         if (lineText.startsWith(year) && lineText.endsWith("Envelope>")) {
@@ -273,16 +296,18 @@ public class FancyLogAnalysisTask {
         return sessionID;
     }
 
-    private File getUnZipedFile(File file, String tempFileLocation) {
+    private File getUnZipedFile(File file, String tempFileLocation) throws IOException {
         File tempfile = null;
+        GZIPInputStream gzis = null;
+        FileOutputStream out = null;
         try {
-            GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(file));
+        	gzis= new GZIPInputStream(new FileInputStream(file));
             String fileName = file.getName();
             fileName = fileName.replace("gz", "log");
             System.out.println(tempFileLocation);
             String unzipfilepath = tempFileLocation + fileName;
             System.out.println(unzipfilepath);
-            FileOutputStream out = new FileOutputStream(unzipfilepath);
+            out = new FileOutputStream(unzipfilepath);
             byte[] buffer = new byte[1024];
             int len;
             while ((len = gzis.read(buffer)) > 0) {
@@ -295,6 +320,8 @@ public class FancyLogAnalysisTask {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            gzis.close();
+            out.close();
         }
         return tempfile;
     }

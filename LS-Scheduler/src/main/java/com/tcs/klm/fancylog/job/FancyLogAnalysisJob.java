@@ -20,7 +20,7 @@ public class FancyLogAnalysisJob extends QuartzJobBean {
                 try {
                     fancyLogAnalysisTask.performTask();
                 }
-                catch (IOException e) {
+                catch (Exception e) {
                     e.printStackTrace();
                 }
             }
