@@ -32,8 +32,8 @@
         $('#FancyLogContainer').jtable({
             title: ' Fancy logs',
             paging: true,
-            sorting: true,
-            defaultSorting: 'date ASC',
+            //sorting: true,
+            //defaultSorting: 'date ASC',
             //selecting: true, //Enable selecting
             //multiselect: true, //Allow multiple selecting
             //selectingCheckboxes: true, //Show checkboxes on first column

@@ -35,7 +35,11 @@ public class SearchLogsService {
         BasicDBObject searchQuery = new BasicDBObject();
         searchQuery.put("PNR", pnr);
         DBCollection collection = mongoTemplate.getCollection(COLLECTION_TRANSACTION);
-        DBCursor cursor = collection.find(searchQuery);
+        
+        BasicDBObject sortOrder = new BasicDBObject();
+        sortOrder.put("date", 1); // order DESC 
+        
+        DBCursor cursor = collection.find(searchQuery).sort(sortOrder);
         List<LogKey> logKeys = new ArrayList<LogKey>();
         while (cursor.hasNext()) {
             DBObject object = cursor.next();
