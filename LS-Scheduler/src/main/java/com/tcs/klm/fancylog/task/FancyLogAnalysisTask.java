@@ -71,35 +71,38 @@ public class FancyLogAnalysisTask {
             String[] names = StringUtils.split(gzFileLocation, "/");
             String tempFileLocation = gzFileLocation.replace(names[names.length - 1], "temp");
             File[] files = getListOfFiles(gzFileLocation);
-            (new File(tempFileLocation)).mkdirs();
-            StringBuffer sbf = null;
-            String sCurrentLine = null;
-            for (File file : files) {
-                File tmpFile = getUnZipedFile(file, tempFileLocation);
-                if (tmpFile != null) {
-                    BufferedReader br = new BufferedReader(new FileReader(tmpFile));
-                    sbf = new StringBuffer();
-                    while ((sCurrentLine = br.readLine()) != null) {
-                        if (sCurrentLine.startsWith(year)) {
-                            try {
-                                processLastLine(sbf.toString(), sessionIDPossition, year, file.getName());
+            if (files != null) {
+                (new File(tempFileLocation)).mkdirs();
+                StringBuffer sbf = null;
+                String sCurrentLine = null;
+                for (File file : files) {
+                    File tmpFile = getUnZipedFile(file, tempFileLocation);
+                    if (tmpFile != null) {
+                        BufferedReader br = new BufferedReader(new FileReader(tmpFile));
+                        sbf = new StringBuffer();
+                        while ((sCurrentLine = br.readLine()) != null) {
+                            if (sCurrentLine.startsWith(year)) {
+                                try {
+                                    processLastLine(sbf.toString(), sessionIDPossition, year, file.getName());
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                sbf.delete(0, sbf.length());
+                                sbf.append(sCurrentLine);
                             }
-                            catch (Exception e) {
-                                e.printStackTrace();
+                            else {
+                                sbf.append(sCurrentLine);
                             }
-                            sbf.delete(0, sbf.length());
-                            sbf.append(sCurrentLine);
                         }
-                        else {
-                            sbf.append(sCurrentLine);
-                        }
+                        br.close();
                     }
-                    br.close();
+                    tmpFile.delete();
                 }
-                tmpFile.delete();
+                File gzfolder = new File(gzFileLocation);
+                deleteDirectory(gzfolder);
             }
-            File gzfolder = new File(gzFileLocation);
-            deleteDirectory(gzfolder);
+
         }
         System.out.println("FancyLogAnalysisTask end" + System.currentTimeMillis());
     }
@@ -126,9 +129,11 @@ public class FancyLogAnalysisTask {
             String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
             String sessionID = null;
             String serviceName = null;
+            String date = null;
             if (lineText.contains(".PROVIDER_REQUEST")) {
                 sessionID = getSessionID(lineText, sessionIDPossition);
                 serviceName = getServiceName(xmlPayload);
+                date = getDate(lineText);
                 LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                 if (logAnalyzer != null) {
                     List<LogKey> logKeys = logAnalyzer.getLogKeyFromRequest(xmlPayload);
@@ -139,10 +144,10 @@ public class FancyLogAnalysisTask {
                         for (LogKey logKey : logKeys) {
                             // lstTmpsessionIdUPR.put(logKey.getPassengerId(), sessionID);
                             logKey.setSessionID(sessionID);
+                            logKey.setDate(date);
                         }
                         lstTempLogs.put(sessionID, sbfTemp);
                         lstTmpKeys.put(sessionID, logKeys);
-
                     }
                 }
             }
@@ -215,6 +220,19 @@ public class FancyLogAnalysisTask {
 
             }
         }
+    }
+
+    private String getDate(String line) {
+        String dateString = null;
+        if (line.startsWith("2014-")) {
+            String strs[] = line.split(" ");
+            dateString = strs[0] + " " + strs[1];// line.substring(24, 47);
+        }
+        /*
+         * SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS"); Date date = null; try { date = sdf.parse(dateString); } catch (ParseException e) { // TODO Auto-generated catch block
+         * e.printStackTrace(); }
+         */
+        return dateString;
     }
 
     // private String getPassengerId(String lineText) {

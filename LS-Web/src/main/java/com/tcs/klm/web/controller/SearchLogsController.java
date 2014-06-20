@@ -41,16 +41,15 @@ public class SearchLogsController {
     String pnr) {
         Map<String, Object> searchResultsMap = new HashMap<String, Object>();
         searchResultsMap.put("Records", searchLogsService.searchResults(pnr));
-        System.out.println("searchResultsMap");
         searchResultsMap.put("Result", "OK");
         return searchResultsMap;
     }
 
     @RequestMapping(value = "/logs")
     public String logs(@RequestParam
-    final String id, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    final String id, ModelMap model) throws IOException {
         model.addAttribute("logs", searchLogsService.getLogs(id));
-        return "../view/log.jsp";
+        return "/view/log.jsp";
     }
 
     @RequestMapping(value = "/download")
