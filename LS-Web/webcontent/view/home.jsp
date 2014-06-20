@@ -35,7 +35,7 @@
             sorting: true,
             defaultSorting: 'date ASC',
             selecting: true, //Enable selecting
-            multiselect: true, //Allow multiple selecting
+            //multiselect: true, //Allow multiple selecting
             //selectingCheckboxes: true, //Show checkboxes on first column
             //selectOnRowClick: false, //Enable this to only select using checkboxes
             actions: {

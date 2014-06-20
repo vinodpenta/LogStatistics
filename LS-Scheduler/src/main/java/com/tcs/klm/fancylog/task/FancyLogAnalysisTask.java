@@ -6,7 +6,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +105,24 @@ public class FancyLogAnalysisTask {
                 File gzfolder = new File(gzFileLocation);
                 deleteDirectory(gzfolder);
             }
+            Object value = settings.get("noOfDays");
+            if (value != null) {
+                int noOfDays = Integer.valueOf(value.toString());
+                calendar.add(Calendar.HOUR_OF_DAY, -noOfDays * 24);
+                Date today = calendar.getTime();
+                DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH");
+                String date = formatter.format(today);
+                DBCollection dbCollectionLog = mongoTemplate.getCollection(COLLECTION_LOGS);
+                BasicDBObject searchQuery = new BasicDBObject();
+                searchQuery.put("date", date);
+                dbCollectionLog.remove(searchQuery);
+
+                BasicDBObject regexQuery = new BasicDBObject();
+                regexQuery.put("date", new BasicDBObject("$regex", date + ".*").append("$options", "i"));
+
+                DBCollection dbCollectionTransaction = mongoTemplate.getCollection(COLLECTION_TRANSACTION);
+                dbCollectionTransaction.remove(regexQuery);
+            }
 
         }
         System.out.println("FancyLogAnalysisTask end" + System.currentTimeMillis());
@@ -176,6 +197,10 @@ public class FancyLogAnalysisTask {
 
                     DBObject dBObjectLog = new BasicDBObject();
                     dBObjectLog.put("log", compressedLog);
+                    Date today = Calendar.getInstance().getTime();
+                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH");
+                    String date1 = formatter.format(today);
+                    dBObjectLog.put("date", date1);
                     dbCollectionLog.insert(dBObjectLog);
                     String logID = dBObjectLog.get("_id").toString();
 
