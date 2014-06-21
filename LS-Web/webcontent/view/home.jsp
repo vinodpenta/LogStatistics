@@ -31,7 +31,7 @@
         //Prepare jtable plugin
         $('#FancyLogContainer').jtable({
             title: ' Fancy logs',
-            paging: true,
+            //paging: true,
             //sorting: true,
             //defaultSorting: 'date ASC',
             //selecting: true, //Enable selecting
