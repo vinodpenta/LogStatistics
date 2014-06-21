@@ -38,3 +38,25 @@
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+.button-exception{
+	font-size: 18px;
+	width: 18%;
+	margin-right: 5%;
+}
+.page-fancylog{
+	width: 98%;
+	padding: 10px;
+	margin: 0 auto;
+}
+#example span{
+	margin-left:-20px;
+	}
+.controls{
+	display:table;
+	margin-top: 10px;
+	}
+.control-label{
+	float:left;
+	padding:5px;
+	font-size: 18px; 
+	}

@@ -33,13 +33,12 @@ public class FancyLogDownloadTask {
     public static final String COLLECTION_NAME = "settings";
 
     public void performTask() {
-    	//System.out.println("FancyLogDownloadTask");
+        // System.out.println("FancyLogDownloadTask");
         FancySharedInfo.getInstance().setDownloadInProgress(true);
         DBCollection dbCollection = mongoTemplate.getCollection(COLLECTION_NAME);
-        //System.out.println(dbCollection.getName());
+        // System.out.println(dbCollection.getName());
         DBCursor dbCursor = dbCollection.find();
         while (dbCursor.hasNext()) {
-            boolean isDownloadSuccess = false;
             DBObject object = dbCursor.next();
             String applicationName = (String) object.get("applicationName");
             String fancyLogURLPattern = (String) object.get("fancyLogURLPattern");
@@ -81,7 +80,7 @@ public class FancyLogDownloadTask {
                         }
                     }
                 }
-                isDownloadSuccess = starFileDownload(logInURL, userName, passWord, lstHyeperLink, downloadLocation);
+                starFileDownload(logInURL, userName, passWord, lstHyeperLink, downloadLocation);
                 FancySharedInfo.getInstance().setDownloadInProgress(false);
                 FancySharedInfo.getInstance().setLastTaskSuccessful(true);
 

@@ -1,7 +1,5 @@
 package com.tcs.klm.fancylog.job;
 
-import java.io.IOException;
-
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;

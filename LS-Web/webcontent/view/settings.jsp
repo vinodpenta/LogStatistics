@@ -111,7 +111,7 @@
 
 <%@include file="jspf/header.jspf" %>
 
-<div class="bs-example">
+<div class="bs-example page-fancylog">
 <div id="SettingsContainer"></div>
 </div>
 

@@ -140,7 +140,7 @@
 <!-- <div class="bs-example"> -->
 <%@include file = "jspf/header.jspf" %>
 	<!-- </div> -->
-	<div class="bs-example">
+	<div class="bs-example page-fancylog">
 		<nav class="navbar navbar-default" role="navigation">
 		<div class="container-fluid">
 			<div class="navbar-header">
