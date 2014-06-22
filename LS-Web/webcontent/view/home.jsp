@@ -16,8 +16,6 @@
 <link href="../static/jtable/themes/lightcolor/gray/jtable.css" rel="stylesheet" type="text/css" />
 <script src="../static/jtable/jquery.jtable.min.js" type="text/javascript"></script>
 
-
-      
 <!-- Custom styles for this template -->
 <link href="../static/css/fancylog.css" rel="stylesheet">
 
@@ -39,7 +37,7 @@
             //selectingCheckboxes: true, //Show checkboxes on first column
             //selectOnRowClick: false, //Enable this to only select using checkboxes
             actions: {
-                listAction: '../config/searchLogs',
+                listAction: '../config/searchLogs'
             },
             fields: {
                 /* sessionID: {
@@ -89,32 +87,7 @@
 					    	return '<a href="../config/searchLogs/download?id='+data.record.sessionID+'"><span class="glyphicon glyphicon-save"></span></a>';
 					    }
                 }
-            }/* ,
-            //Register to selectionChanged event to hanlde events
-            selectionChanged: function () {
-                //Get all selected rows
-                var $selectedRows = $('#FancyLogContainer').jtable('selectedRows');
- 
-                $('#SelectedRowList').empty();
-                if ($selectedRows.length > 0) {
-                    //Show selected rows
-                    $selectedRows.each(function () {
-                        var record = $(this).data('record');
-                        $('#SelectedRowList').append(
-                            '<b>StudentId</b>: ' + record.StudentId +
-                            '<br /><b>Name</b>:' + record.Name + '<br /><br />'
-                            );
-                    });
-                } else {
-                    //No rows selected
-                    $('#SelectedRowList').append('No row selected! Select rows to see here...');
-                }
-            },
-            rowInserted: function (event, data) {
-                if (data.record.Name.indexOf('Andrew') >= 0) {
-                    $('#FancyLogContainer').jtable('selectRows', data.row);
-                }
-            } */
+            }
         });
         
         //load records when user click 'load records' button.
