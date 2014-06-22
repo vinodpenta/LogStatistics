@@ -9,30 +9,63 @@
 <link href="../static/jquery/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" type="text/css" />
 
 <!-- Bootstrap core CSS -->
-<link href="../static/bootstrap/css/bootstrap.css" rel="stylesheet">
-<link href="../static/bootstrap/css/docs.css" rel="stylesheet">
-
-<script href="../static/booststrap/js/bootstrap.js"/>
-
-<link href="../static/datepicker/css/datepicker.css" rel="stylesheet">
-<script href="../static/datepicker/js/bootstrap-datepicker.js"/>
+<link href="../static/bootstrap/css/bootstrap.css" rel="stylesheet"/>
+<link href="../static/bootstrap/css/docs.css" rel="stylesheet"/>
 
 <!-- JTable -->
-<link href="../static/jtable/themes/lightcolor/gray/jtable.css" rel="stylesheet" type="text/css" />
+<link href="../static/jtable/themes/metro/blue/jtable.css" rel="stylesheet" type="text/css" />
 <script src="../static/jtable/jquery.jtable.min.js"	type="text/javascript"></script>
  
 <!-- Custom styles for this template -->
-<link href="../static/css/fancylog.css" rel="stylesheet">
+<link href="../static/css/fancylog.css" rel="stylesheet"/>
 
 <style type="text/css" id="holderjs-style"></style>
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		$('.date-picker').datepicker();
-		$('#date-picker-2').change(function() {
-			alert("Handler for .change() called.");
-
+		
+		$(".date-picker").datepicker({
+			minDate : -10,
+			maxDate : "-1D",
+			autoclose: true
 		});
+
+		//Prepare jtable plugin
+        $('#ExceptionCountContainer').jtable({
+            title: ' Fancy logs',
+            //paging: true,
+            //sorting: true,
+            //defaultSorting: 'date ASC',
+            //selecting: true, //Enable selecting
+            //multiselect: true, //Allow multiple selecting
+            //selectingCheckboxes: true, //Show checkboxes on first column
+            //selectOnRowClick: false, //Enable this to only select using checkboxes
+            actions: {
+                listAction: '../config/exceptions'
+            },
+            fields: {
+                className: {
+                    title: 'Class Name',
+                    width: '8%'
+                    
+                },
+                exceptionDescription: {
+                    title: 'Exception Description',
+                    width: '50%'
+                },
+                count: {
+                	title: 'Count',
+                	width: '2%'
+                }
+            }
+        });
+		
+		$('#date-picker-2').change(function(e) {
+			//e.preventDefault();
+			$('#ExceptionCountContainer').jtable('load', {
+				date : $('#date-picker-2').val()
+			});
+		}); 
 	});
 </script>
 
@@ -44,15 +77,17 @@
 		<%@include file="jspf/exceptionmenu.jspf"%>
 		<nav class="navbar navbar-default" role="navigation">
 		<div class="control-group">
-        	<label for="date-picker-2" class="control-label">Select Data</label>
+        	<label for="date-picker-2" class="control-label">Select Date</label>
 	        <div class="controls">
 	            <div id="datepicker" class="input-group">
-	                <input id="date-picker-2" type="text" class="date-picker form-control"/>
+	                <input id="date-picker-2" name="date-picker-2" type="text" class="date-picker form-control" placeholder="MM/DD/YYYY"/>
 	                <label for="date-picker-2" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
 	                </label>
 	            </div>
 	        </div>
     	</div>
+    	</nav>
+    	<div id="ExceptionCountContainer"></div>
 	</div>
 </body>
 </html>
