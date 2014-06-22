@@ -83,6 +83,11 @@
                 	title: 'Dowload location',
                 	visibility:'hidden'
                 },
+                exceptionFiles:{
+                	title: 'Exception file names(separated by comma)',
+                	sorting: false,
+                	visibility:'hidden'
+                },                
                 logInURL: {
                 	title: 'Login URL',
                 	sorting: false,

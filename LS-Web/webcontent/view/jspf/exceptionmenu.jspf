@@ -1,7 +1,7 @@
 
 		<div class="page-fancylog" data-toggle="nav-pills">
 			<button type="button" class="btn btn-primary btn-group button-exception" onclick="window.location.href='../view/exceptions.jsp'" >Date</button>
-			<button type="button" class="btn btn-primary btn-group button-exception" >Time vs Exceptions</button>
-			<button type="button" class="btn btn-primary btn-group button-exception" >Time vs Exceptions</button>
-			<button type="button" class="btn btn-primary btn-group button-exception" >Time vs Exceptions</button>
+			<button type="button" class="btn btn-primary btn-group button-exception" onclick="window.location.href='../view/exceptions.jsp'" >Time vs Exceptions</button>
+			<!-- <button type="button" class="btn btn-primary btn-group button-exception" >Time vs Exceptions</button>
+			<button type="button" class="btn btn-primary btn-group button-exception" >Time vs Exceptions</button> -->
 		</div>

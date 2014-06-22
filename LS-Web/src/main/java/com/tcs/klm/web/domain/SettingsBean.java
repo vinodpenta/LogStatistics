@@ -20,6 +20,7 @@ public class SettingsBean {
     private String passWord;
     private String fileName;
     private String downloadLocation;
+    private String exceptionFiles;
 
     public String getId() {
         return id;
@@ -123,5 +124,13 @@ public class SettingsBean {
 
     public void setDownloadLocation(String downloadLocation) {
         this.downloadLocation = downloadLocation;
+    }
+
+    public String getExceptionFiles() {
+        return exceptionFiles;
+    }
+
+    public void setExceptionFiles(String exceptionFiles) {
+        this.exceptionFiles = exceptionFiles;
     }
 }

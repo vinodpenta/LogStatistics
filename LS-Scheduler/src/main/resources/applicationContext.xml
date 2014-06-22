@@ -37,18 +37,21 @@
 			<list>
 				<ref bean="downloadJob" />
 				<ref bean="analyzeJob" />
+				<ref bean="exceptionLogJob"/>
 			</list>
 		</property>
 		<property name="triggers">
 			<list>
 				<ref bean="downloadTrigger" />
 				<ref bean="analyzeTrigger" />
+				<ref bean="exceptionLogTrigger"/>
 			</list>
 		</property>
 	</bean>
 
  	<bean id="fancyLogDownloadTask" class="com.tcs.klm.fancylog.task.FancyLogDownloadTask" />
 	<bean id="fancyLogAnalysisTask" class="com.tcs.klm.fancylog.task.FancyLogAnalysisTask" />
+	<bean id="exceptionLogTask" class="com.tcs.klm.fancylog.task.ExceptionLogTask"/>
 
 	<bean name="downloadJob" class="org.springframework.scheduling.quartz.JobDetailBean">
 		<property name="jobClass" value="com.tcs.klm.fancylog.job.FancyLogDownloadJob" />
@@ -67,6 +70,15 @@
 			</map>
 		</property>
 	</bean>
+	
+	<bean name="exceptionLogJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+		<property name="jobClass" value="com.tcs.klm.fancylog.job.ExceptionLogJob"/>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="exceptionLogTask" value-ref="exceptionLogTask"></entry>
+			</map>
+		</property>
+	</bean>
 
 	<bean id="downloadTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="downloadJob" />
@@ -76,5 +88,10 @@
 	<bean id="analyzeTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="analyzeJob" />
 		<property name="cronExpression" value="50 27 0/1 * * ?" />
+	</bean>
+	
+	<bean id="exceptionLogTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="exceptionLogJob" />
+		<property name="cronExpression" value="50 * * * * ?"/>
 	</bean>
 </beans>
