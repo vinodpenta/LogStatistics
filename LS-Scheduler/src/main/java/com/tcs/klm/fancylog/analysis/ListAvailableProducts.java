@@ -10,6 +10,8 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -20,6 +22,7 @@ import com.tcs.klm.fancylog.utils.Utils;
 
 @Component(value = "ListAvailableProducts")
 public class ListAvailableProducts extends LogAnalyzer {
+    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(ListAvailableProducts.class);
 
     @Override
     public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
@@ -102,8 +105,8 @@ public class ListAvailableProducts extends LogAnalyzer {
             }
         }
         catch (Exception exception) {
-            System.out.println(xmlPayload);
-            exception.printStackTrace();
+            APPLICATION_LOGGER.debug(xmlPayload);
+            APPLICATION_LOGGER.error("Exception occured while parsing listAvailableProductsSuccessResponse {}", exception.getStackTrace());
         }
 
         return logKey;

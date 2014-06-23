@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,8 @@ import com.tcs.klm.fancylog.utils.FancySharedInfo;
 @Component(value = "fancyLogAnalysisTask")
 public class FancyLogAnalysisTask {
 
+    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(FancyLogAnalysisTask.class);
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -43,7 +47,7 @@ public class FancyLogAnalysisTask {
     // private static Map<String, List<String>> map = new HashMap<String, List<String>>();
 
     public void performTask() throws IOException {
-        System.out.println("FancyLogAnalysisTask" + System.currentTimeMillis());
+        APPLICATION_LOGGER.info("FancyLogAnalysisTask {}", System.currentTimeMillis());
         FancySharedInfo.getInstance().setAnalysisInProgress(true);
         DBCollection settingsCollection = mongoTemplate.getCollection(COLLECTION_SETTINGS);
         DBCursor settingsCursor = settingsCollection.find();
@@ -108,7 +112,7 @@ public class FancyLogAnalysisTask {
         }
         FancySharedInfo.getInstance().setAnalysisInProgress(false);
         FancySharedInfo.getInstance().setLastTaskSuccessful(true);
-        System.out.println("FancyLogAnalysisTask end" + System.currentTimeMillis());
+        APPLICATION_LOGGER.info("FancyLogAnalysisTask end {}", System.currentTimeMillis());
     }
 
     public static boolean deleteDirectory(File directory) {

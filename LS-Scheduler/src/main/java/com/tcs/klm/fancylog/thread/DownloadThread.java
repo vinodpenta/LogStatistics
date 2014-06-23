@@ -11,12 +11,16 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
 public class DownloadThread implements Runnable {
+
+    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(DownloadThread.class);
 
     private HttpClient httpClient;
     private String hyperLink;
@@ -44,7 +48,7 @@ public class DownloadThread implements Runnable {
             postMethod.setParameter("login-form-type", "pwd");
             try {
                 code = httpClient.executeMethod(postMethod);
-                System.out.println("Login Http Status " + code);
+                APPLICATION_LOGGER.info("Login Http Status {}", code);
             }
             catch (HttpException e) {
                 e.printStackTrace();
@@ -57,7 +61,7 @@ public class DownloadThread implements Runnable {
             System.err.println("invalid logon configurations found");
         }
         if (code != 200) {
-            System.out.println("Unable to login to server, Http Status Code = " + code);
+            APPLICATION_LOGGER.error("Unable to login to server, Http Status Code = {} ", code);
             httpClient = null;
         }
         return httpClient;
@@ -70,10 +74,9 @@ public class DownloadThread implements Runnable {
         try {
             int code = httpClient.executeMethod(getMethodLog);
             if (code == 200) {
-                System.out.println("response code 200");
+                APPLICATION_LOGGER.info("response code 200");
                 int fileNameBeginIndex = hyperLink.indexOf("oldlogs/") + "oldlogs/".length();
                 int fileNameEndIndex = hyperLink.indexOf("&app=");
-                System.out.println(hyperLink);
                 (new File(downloadLocation)).mkdirs();
                 String fileName = downloadLocation + hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
                 fileName = fileName.replace(".gz", ".log");
@@ -83,8 +86,8 @@ public class DownloadThread implements Runnable {
                 // downloadSuccessFlag = true;
             }
             else {
-                System.out.println("failed to download log file " + hyperLink);
-                System.out.println("Http Status Code : " + code);
+                APPLICATION_LOGGER.error("failed to download log file {}", hyperLink);
+                APPLICATION_LOGGER.error("Http Status Code : {}", code);
             }
         }
         catch (HttpException e) {
@@ -100,7 +103,7 @@ public class DownloadThread implements Runnable {
         OutputStream out = null;
         File targetFile = new File(fileName);
 
-        System.out.println("Downloading file " + targetFile.getPath());
+        APPLICATION_LOGGER.info("Downloading file {}", targetFile.getPath());
         try {
             GZIPInputStream gzis = new GZIPInputStream(isTextOrTail);
             out = new FileOutputStream(targetFile);

@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,8 @@ import com.tcs.klm.fancylog.utils.Utils;
 @Component
 @Scope("prototype")
 public class AnalysisThread implements Runnable {
+
+    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(AnalysisThread.class);
 
     private MongoTemplate mongoTemplate;
 
@@ -65,8 +69,8 @@ public class AnalysisThread implements Runnable {
                             processLastLine(sbf.toString(), sessionIDPossition, year, file.getName());
                         }
                         catch (Exception e) {
-                            System.out.println(sbf.toString());
-                            e.printStackTrace();
+                            APPLICATION_LOGGER.error(sbf.toString());
+                            APPLICATION_LOGGER.error(e.getMessage());
                         }
                         sbf.delete(0, sbf.length());
                         sbf.append(sCurrentLine);
@@ -83,13 +87,6 @@ public class AnalysisThread implements Runnable {
             e.printStackTrace();
         }
     }
-
-    /*
-     * private File getUnZipedFile(File file, String tempFileLocation) { File tempfile = null; try { GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(file)); String fileName = file.getName(); fileName =
-     * fileName.replace("gz", "log"); System.out.println(tempFileLocation); String unzipfilepath = tempFileLocation + fileName; System.out.println(unzipfilepath); FileOutputStream out = new
-     * FileOutputStream(unzipfilepath); byte[] buffer = new byte[1024]; int len; while ((len = gzis.read(buffer)) > 0) { out.write(buffer, 0, len); } gzis.close(); out.close(); System.out.println(unzipfilepath); tempfile
-     * = new File(unzipfilepath); } catch (Exception ex) { ex.printStackTrace(); } return tempfile; }
-     */
 
     private void processLastLine(String lineText, String sessionIDPossition, String year, String fileName) throws IOException {
         if (lineText.startsWith(year) && lineText.endsWith("Envelope>")) {

@@ -32,11 +32,13 @@ public class SettingsService {
 
         Query query = new Query(Criteria.where("_id").is(setting.getId()));
         SettingsBean settingsBean = (SettingsBean) mongoTemplate.findOne(query, SettingsBean.class, COLLECTION_NAME);
+
         return settingsBean;
     }
 
     public List<SettingsBean> list() {
         List<SettingsBean> settingss = mongoTemplate.findAll(SettingsBean.class);
+
         return settingss;
     }
 

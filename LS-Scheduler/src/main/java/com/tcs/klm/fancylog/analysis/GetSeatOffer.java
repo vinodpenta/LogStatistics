@@ -10,6 +10,8 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -19,6 +21,8 @@ import com.tcs.klm.fancylog.utils.Utils;
 
 @Component(value = "GetSeatOffer")
 public class GetSeatOffer extends LogAnalyzer {
+
+    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(GetSeatOffer.class);
 
     @Override
     public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
@@ -62,7 +66,7 @@ public class GetSeatOffer extends LogAnalyzer {
 
         }
         catch (Exception e) {
-            e.printStackTrace();
+            APPLICATION_LOGGER.error("Exception occured while parsing GetSeatOfferRequest {}", e.getStackTrace());
         }
         return lstLogKey;
     }
@@ -92,8 +96,8 @@ public class GetSeatOffer extends LogAnalyzer {
 
         }
         catch (Exception exception) {
-            System.out.println(xmlPayload);
-            exception.printStackTrace();
+            APPLICATION_LOGGER.debug(xmlPayload);
+            APPLICATION_LOGGER.error("Exception occured while parsing GetSeatOfferResponse {}", exception.getStackTrace());
         }
 
         return logKey;

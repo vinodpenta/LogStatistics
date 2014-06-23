@@ -14,6 +14,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -27,16 +29,16 @@ import com.tcs.klm.fancylog.utils.FancySharedInfo;
 @Component(value = "fancyLogDownloadTask")
 public class FancyLogDownloadTask {
 
+    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(FancyLogDownloadTask.class);
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
     public static final String COLLECTION_NAME = "settings";
 
     public void performTask() {
-        // System.out.println("FancyLogDownloadTask");
         FancySharedInfo.getInstance().setDownloadInProgress(true);
         DBCollection dbCollection = mongoTemplate.getCollection(COLLECTION_NAME);
-        // System.out.println(dbCollection.getName());
         DBCursor dbCursor = dbCollection.find();
         while (dbCursor.hasNext()) {
             DBObject object = dbCursor.next();
@@ -93,7 +95,7 @@ public class FancyLogDownloadTask {
         if (listHyeperLink != null && !listHyeperLink.isEmpty()) {
             try {
                 Runnable task;
-                System.out.println("Download Started..." + System.currentTimeMillis());
+                APPLICATION_LOGGER.info("Download Started... {}", System.currentTimeMillis());
                 List<Thread> threads = new ArrayList<Thread>();
                 /*
                  * ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor(); taskExecutor.setCorePoolSize(4); taskExecutor.setMaxPoolSize(20); taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
@@ -110,18 +112,13 @@ public class FancyLogDownloadTask {
                     thread.join();
 
                 }
-                // check active thread, if zero then shut down the thread pool
-                /*
-                 * for (;;) { int count = taskExecutor.getActiveCount(); System.out.println("Active Threads : " + count); try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); } if (count ==
-                 * 0) { taskExecutor.shutdown(); break; } }
-                 */
             }
             catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-        System.out.println("Download Completed...  >> " + System.currentTimeMillis());
+        APPLICATION_LOGGER.info("Download Completed...  >> {} ", System.currentTimeMillis());
         return downloadSuccessFlag;
     }
 
@@ -141,7 +138,7 @@ public class FancyLogDownloadTask {
             postMethod.setParameter("login-form-type", "pwd");
             try {
                 code = httpClient.executeMethod(postMethod);
-                System.out.println("Login Http Status " + code);
+                APPLICATION_LOGGER.info("Login Http Status {} ", code);
             }
             catch (HttpException e) {
                 e.printStackTrace();
@@ -151,10 +148,10 @@ public class FancyLogDownloadTask {
             }
         }
         else {
-            System.err.println("invalid logon configurations found");
+            APPLICATION_LOGGER.error("invalid logon configurations found");
         }
         if (code != 200) {
-            System.out.println("Unable to login to server, Http Status Code = " + code);
+            APPLICATION_LOGGER.error("Unable to login to server, Http Status Code = {}", code);
             httpClient = null;
         }
         return httpClient;
@@ -163,7 +160,6 @@ public class FancyLogDownloadTask {
     private String getFancyLogMainPage(HttpClient httpClient, String strFancyLogMainURL) {
         String responseString = null;
         GetMethod getMethod = new GetMethod(strFancyLogMainURL);
-        // System.out.println("Processing Fancy Log Main Page URL " + strFancyLogMainURL);
         int code = 0;
         try {
             code = httpClient.executeMethod(getMethod);
@@ -176,7 +172,7 @@ public class FancyLogDownloadTask {
             e.printStackTrace();
         }
         if (code != 200) {
-            System.out.println("unable to access fancy log main page");
+            APPLICATION_LOGGER.error("unable to access fancy log main page");
             return null;
         }
         else {
