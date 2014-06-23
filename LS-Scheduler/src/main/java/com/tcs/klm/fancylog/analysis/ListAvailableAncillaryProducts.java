@@ -18,11 +18,12 @@ import com.tcs.klm.fancylog.utils.Utils;
 
 @Component(value = "ListAvailableAncillaryProducts")
 public class ListAvailableAncillaryProducts extends LogAnalyzer {
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = null;
 
     @Override
     public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+
         String value = null;
         List<LogKey> lstLogKey = new ArrayList<LogKey>();
         try {

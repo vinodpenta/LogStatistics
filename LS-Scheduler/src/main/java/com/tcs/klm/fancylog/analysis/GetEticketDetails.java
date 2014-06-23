@@ -18,9 +18,6 @@ import com.tcs.klm.fancylog.utils.Utils;
 @Component(value = "GetEticketDetails")
 public class GetEticketDetails extends LogAnalyzer {
 
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = null;
-
     @Override
     public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
         // TODO Auto-generated method stub
@@ -29,6 +26,9 @@ public class GetEticketDetails extends LogAnalyzer {
 
     @Override
     public LogKey getLogKeyFromResponse(String xmlPayload) {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+
         String value = null;
         LogKey logKey = null;
         try {

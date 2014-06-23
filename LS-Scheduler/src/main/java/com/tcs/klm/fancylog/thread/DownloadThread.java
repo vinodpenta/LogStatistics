@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 
@@ -80,6 +79,7 @@ public class DownloadThread implements Runnable {
                 fileName = fileName.replace(".gz", ".log");
                 BufferedInputStream isTextOrTail = new BufferedInputStream(getMethodLog.getResponseBodyAsStream());
                 saveFileContent(isTextOrTail, fileName);
+                isTextOrTail.close();
                 // downloadSuccessFlag = true;
             }
             else {

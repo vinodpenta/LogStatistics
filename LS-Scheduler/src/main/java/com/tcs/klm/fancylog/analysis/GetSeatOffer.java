@@ -20,12 +20,12 @@ import com.tcs.klm.fancylog.utils.Utils;
 @Component(value = "GetSeatOffer")
 public class GetSeatOffer extends LogAnalyzer {
 
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = null;
-    SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-
     @Override
     public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+
         String value = null;
         List<LogKey> lstLogKey = new ArrayList<LogKey>();
         try {
@@ -69,6 +69,10 @@ public class GetSeatOffer extends LogAnalyzer {
 
     @Override
     public LogKey getLogKeyFromResponse(String xmlPayload) {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+
         String value = null;
         LogKey logKey = null;
         try {

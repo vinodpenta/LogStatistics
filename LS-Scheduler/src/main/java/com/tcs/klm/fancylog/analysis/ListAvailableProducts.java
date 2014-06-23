@@ -21,11 +21,11 @@ import com.tcs.klm.fancylog.utils.Utils;
 @Component(value = "ListAvailableProducts")
 public class ListAvailableProducts extends LogAnalyzer {
 
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = null;
-
     @Override
     public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+
         String value = null;
         List<LogKey> lstLogKey = new ArrayList<LogKey>();
         try {
@@ -71,6 +71,9 @@ public class ListAvailableProducts extends LogAnalyzer {
 
     @Override
     public LogKey getLogKeyFromResponse(String xmlPayload) {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+
         String value = null;
         LogKey logKey = null;
         try {
