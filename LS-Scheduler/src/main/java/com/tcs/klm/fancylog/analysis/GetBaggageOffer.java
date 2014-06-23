@@ -87,6 +87,7 @@ public class GetBaggageOffer extends LogAnalyzer {
             }
         }
         catch (Exception exception) {
+            System.out.println(xmlPayload);
             exception.printStackTrace();
         }
 

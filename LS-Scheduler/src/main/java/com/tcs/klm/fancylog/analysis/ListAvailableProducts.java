@@ -99,6 +99,7 @@ public class ListAvailableProducts extends LogAnalyzer {
             }
         }
         catch (Exception exception) {
+            System.out.println(xmlPayload);
             exception.printStackTrace();
         }
 
