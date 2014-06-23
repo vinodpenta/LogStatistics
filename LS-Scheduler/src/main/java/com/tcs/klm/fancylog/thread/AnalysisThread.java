@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -25,29 +26,30 @@ import com.tcs.klm.fancylog.analysis.LogAnalyzer;
 import com.tcs.klm.fancylog.domain.LogKey;
 import com.tcs.klm.fancylog.utils.Utils;
 
+@Component
+@Scope("prototype")
 public class AnalysisThread implements Runnable {
+
+    private MongoTemplate mongoTemplate;
+
+    private Map<String, LogAnalyzer> logAnalyzerMap;
 
     private File file;
     private String tempFileLocation;
     private String sessionIDPossition;
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private Map<String, LogAnalyzer> logAnalyzerMap;
-
     private static Map<String, StringBuffer> lstTempLogs = new HashMap<String, StringBuffer>();
     private static Map<String, List<LogKey>> lstTmpKeys = new HashMap<String, List<LogKey>>();
 
-    private static final String COLLECTION_SETTINGS = "settings";
     private String COLLECTION_TRANSACTION = "transactions";
     private String COLLECTION_LOGS = "logs";
 
-    public AnalysisThread(File file, String tempFileLocation, String sessionIDPossition) {
+    public AnalysisThread(File file, String tempFileLocation, String sessionIDPossition, Map<String, LogAnalyzer> logAnalyzerMap, MongoTemplate mongoTemplate) {
         this.file = file;
         this.tempFileLocation = tempFileLocation;
         this.sessionIDPossition = sessionIDPossition;
+        this.logAnalyzerMap = logAnalyzerMap;
+        this.mongoTemplate = mongoTemplate;
     }
 
     @Override

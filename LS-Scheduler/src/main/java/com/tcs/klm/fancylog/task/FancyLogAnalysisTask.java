@@ -1,18 +1,14 @@
 package com.tcs.klm.fancylog.task;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +20,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.tcs.klm.fancylog.analysis.LogAnalyzer;
-import com.tcs.klm.fancylog.domain.LogKey;
 import com.tcs.klm.fancylog.thread.AnalysisThread;
 import com.tcs.klm.fancylog.utils.FancySharedInfo;
 
@@ -43,9 +38,6 @@ public class FancyLogAnalysisTask {
     private String COLLECTION_TRANSACTION;
     private String COLLECTION_LOGS;
 
-    private static Map<String, StringBuffer> lstTempLogs = new HashMap<String, StringBuffer>();
-    private static Map<String, List<LogKey>> lstTmpKeys = new HashMap<String, List<LogKey>>();
-
     // private static Map<String, String> lstTmpsessionIdUPR = new HashMap<String, String>();
     // private static Map<String, String> lstTmpsessionMap = new HashMap<String, String>();
     // private static Map<String, List<String>> map = new HashMap<String, List<String>>();
@@ -56,7 +48,6 @@ public class FancyLogAnalysisTask {
         DBCollection settingsCollection = mongoTemplate.getCollection(COLLECTION_SETTINGS);
         DBCursor settingsCursor = settingsCollection.find();
         Calendar calendar = Calendar.getInstance();
-        String year = calendar.get(Calendar.YEAR) + "";
         while (settingsCursor.hasNext()) {
             DBObject settings = settingsCursor.next();
             // String applicationName = (String) settings.get("applicationName");
@@ -79,7 +70,7 @@ public class FancyLogAnalysisTask {
                     Runnable task;
                     List<Thread> threads = new ArrayList<Thread>();
                     for (File file : files) {
-                        task = new AnalysisThread(file, tempFileLocation, sessionIDPossition);
+                        task = new AnalysisThread(file, tempFileLocation, sessionIDPossition, logAnalyzerMap, mongoTemplate);
                         Thread thread = new Thread(task);
                         thread.start();
                         threads.add(thread);
@@ -87,6 +78,7 @@ public class FancyLogAnalysisTask {
                     for (Thread thread : threads) {
                         thread.join();
                     }
+
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -134,32 +126,6 @@ public class FancyLogAnalysisTask {
             }
         }
         return (directory.delete());
-    }
-
-    private File getUnZipedFile(File file, String tempFileLocation) {
-        File tempfile = null;
-        try {
-            GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(file));
-            String fileName = file.getName();
-            fileName = fileName.replace("gz", "log");
-            System.out.println(tempFileLocation);
-            String unzipfilepath = tempFileLocation + fileName;
-            System.out.println(unzipfilepath);
-            FileOutputStream out = new FileOutputStream(unzipfilepath);
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = gzis.read(buffer)) > 0) {
-                out.write(buffer, 0, len);
-            }
-            gzis.close();
-            out.close();
-            System.out.println(unzipfilepath);
-            tempfile = new File(unzipfilepath);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return tempfile;
     }
 
     private static File[] getListOfFiles(String directoryPath) {

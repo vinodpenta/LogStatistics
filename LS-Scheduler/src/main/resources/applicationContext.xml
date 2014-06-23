@@ -11,7 +11,7 @@
     	http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
     	http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<context:component-scan base-package="com.tcs.klm.fancylog" />
+	<context:component-scan base-package="com.tcs.klm.fancylog.*" />
 	<context:annotation-config />
 	<mvc:annotation-driven/>
 	
@@ -92,6 +92,6 @@
 	
 	<bean id="exceptionLogTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="exceptionLogJob" />
-		<property name="cronExpression" value="50 * * * * ?"/>
+		<property name="cronExpression" value="50 50 1 1 * ?"/>
 	</bean>
 </beans>
