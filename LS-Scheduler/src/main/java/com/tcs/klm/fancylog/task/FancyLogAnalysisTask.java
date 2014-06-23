@@ -1,13 +1,12 @@
 package com.tcs.klm.fancylog.task;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,8 +25,8 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.tcs.klm.fancylog.analysis.LogAnalyzer;
 import com.tcs.klm.fancylog.domain.LogKey;
+import com.tcs.klm.fancylog.thread.AnalysisThread;
 import com.tcs.klm.fancylog.utils.FancySharedInfo;
-import com.tcs.klm.fancylog.utils.Utils;
 
 //import org.apache.commons.lang.stringutils;
 
@@ -76,31 +75,21 @@ public class FancyLogAnalysisTask {
             File[] files = getListOfFiles(gzFileLocation);
             if (files != null) {
                 (new File(tempFileLocation)).mkdirs();
-                StringBuffer sbf = null;
-                String sCurrentLine = null;
-                for (File file : files) {
-                    File tmpFile = getUnZipedFile(file, tempFileLocation);
-                    if (tmpFile != null) {
-                        BufferedReader br = new BufferedReader(new FileReader(tmpFile));
-                        sbf = new StringBuffer();
-                        while ((sCurrentLine = br.readLine()) != null) {
-                            if (sCurrentLine.startsWith(year)) {
-                                try {
-                                    processLastLine(sbf.toString(), sessionIDPossition, year, file.getName());
-                                }
-                                catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                sbf.delete(0, sbf.length());
-                                sbf.append(sCurrentLine);
-                            }
-                            else {
-                                sbf.append(sCurrentLine);
-                            }
-                        }
-                        br.close();
+                try {
+                    Runnable task;
+                    List<Thread> threads = new ArrayList<Thread>();
+                    for (File file : files) {
+                        task = new AnalysisThread(file, tempFileLocation, sessionIDPossition);
+                        Thread thread = new Thread(task);
+                        thread.start();
+                        threads.add(thread);
                     }
-                    tmpFile.delete();
+                    for (Thread thread : threads) {
+                        thread.join();
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
                 File gzfolder = new File(gzFileLocation);
                 deleteDirectory(gzfolder);
@@ -145,170 +134,6 @@ public class FancyLogAnalysisTask {
             }
         }
         return (directory.delete());
-    }
-
-    private void processLastLine(String lineText, String sessionIDPossition, String year, String fileName) throws IOException {
-        if (lineText.startsWith(year) && lineText.endsWith("Envelope>")) {
-            String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
-            String sessionID = null;
-            String serviceName = null;
-            String date = null;
-            if (lineText.contains(".PROVIDER_REQUEST")) {
-                sessionID = getSessionID(lineText, sessionIDPossition);
-                serviceName = getServiceName(xmlPayload);
-                date = getDate(lineText);
-                LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
-                if (logAnalyzer != null) {
-                    List<LogKey> logKeys = logAnalyzer.getLogKeyFromRequest(xmlPayload);
-                    if (logKeys != null && !logKeys.isEmpty()) {
-                        StringBuffer sbfTemp = new StringBuffer();
-                        sbfTemp.append(fileName).append("\n");
-                        sbfTemp.append(lineText).append("\n");
-                        for (LogKey logKey : logKeys) {
-                            // lstTmpsessionIdUPR.put(logKey.getPassengerId(), sessionID);
-                            logKey.setSessionID(sessionID);
-                            logKey.setDate(date);
-                        }
-                        lstTempLogs.put(sessionID, sbfTemp);
-                        lstTmpKeys.put(sessionID, logKeys);
-                    }
-                }
-            }
-            else if (lineText.contains(".PROVIDER_RESPONSE")) {
-                sessionID = getSessionID(lineText, sessionIDPossition);
-                if (lstTmpKeys.containsKey(sessionID)) {
-                    lstTempLogs.get(sessionID).append(lineText).append("\n");
-                    serviceName = getServiceName(xmlPayload);
-                    LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
-                    if (logAnalyzer != null) {
-                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload);
-                        if (responseLogKey != null) {
-                            List<LogKey> logKeys = lstTmpKeys.get(sessionID);
-                            for (LogKey logKey : logKeys) {
-                                logKey.setErrorCode(responseLogKey.getErrorCode());
-                                logKey.setErrorDescription(responseLogKey.getErrorDescription());
-                                // lstTmpsessionIdUPR.remove(logKey.getPassengerId());
-                            }
-                        }
-                    }
-                    StringBuffer log = lstTempLogs.get(sessionID);
-                    String strLog = log.toString();
-                    String compressedLog = Utils.compress(strLog);
-
-                    DBCollection dbCollectionLog = mongoTemplate.getCollection(COLLECTION_LOGS);
-
-                    DBObject dBObjectLog = new BasicDBObject();
-                    dBObjectLog.put("log", compressedLog);
-                    Date today = Calendar.getInstance().getTime();
-                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH");
-                    String date1 = formatter.format(today);
-                    dBObjectLog.put("date", date1);
-                    dbCollectionLog.insert(dBObjectLog);
-                    String logID = dBObjectLog.get("_id").toString();
-
-                    List<LogKey> logKeys = lstTmpKeys.get(sessionID);
-                    for (LogKey key : logKeys) {
-                        key.setLogID(logID);
-                        mongoTemplate.insert(key, COLLECTION_TRANSACTION);
-                    }
-
-                    lstTmpKeys.remove(sessionID);
-                    lstTempLogs.remove(sessionID);
-                    /*
-                     * List<String> wmSessionIDs = map.get(sessionID); if (wmSessionIDs != null) { for (String wmSessionID : wmSessionIDs) { //lstTmpsessionMap.remove(wmSessionID); } }
-                     */
-                    // map.remove(sessionID);
-                }
-                else {
-                    lstTmpKeys.remove(sessionID);
-                    lstTempLogs.remove(sessionID);
-                }
-            }
-            else if (lineText.contains(".CONSUMER_RE")) {
-                sessionID = getSessionID(lineText, sessionIDPossition);
-                // Set<String> keySet = lstTmpsessionMap.keySet();
-                if (lstTmpKeys.containsKey(sessionID)) {
-                    lstTempLogs.get(sessionID).append(lineText).append("\n");
-                    /*
-                     * if (lineText.contains("GetEticketDetails.CONSUMER_RESPONSE")) { serviceName = getServiceName(xmlPayload); LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName); LogKey responseLogKey =
-                     * logAnalyzer.getLogKeyFromResponse(xmlPayload); if (responseLogKey != null) { List<LogKey> logKeys = lstTmpKeys.get(sessionID); for (LogKey logKey : logKeys) {
-                     * logKey.setPNR(responseLogKey.getPNR()); } } }
-                     */
-                }
-                /*
-                 * else if (keySet.contains(sessionID)) { String flowSessionId = lstTmpsessionMap.get(sessionID); if (lstTempLogs.get(flowSessionId) != null) lstTempLogs.get(flowSessionId).append(lineText).append("\n");
-                 * }
-                 */
-                /*
-                 * else { String passengerId = getPassengerId(lineText); if (passengerId != null) { String flowSessionId = lstTmpsessionIdUPR.get(passengerId); if (lstTempLogs.get(flowSessionId) != null) {
-                 * lstTempLogs.get(flowSessionId).append(lineText).append("\n"); lstTmpsessionMap.put(sessionID, flowSessionId); if (map.containsKey(flowSessionId)) { map.get(flowSessionId).add(sessionID); } else {
-                 * List<String> wmSessionIDs = new ArrayList<String>(); wmSessionIDs.add(sessionID); map.put(flowSessionId, wmSessionIDs); } } } }
-                 */
-
-            }
-        }
-    }
-
-    private String getDate(String line) {
-        String dateString = null;
-        Calendar calendar = Calendar.getInstance();
-        if (line.startsWith(calendar.get(Calendar.YEAR) + "")) {
-            String strs[] = line.split(" ");
-            dateString = strs[0] + " " + strs[1];// line.substring(24, 47);
-        }
-        /*
-         * SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS"); Date date = null; try { date = sdf.parse(dateString); } catch (ParseException e) { // TODO Auto-generated catch block
-         * e.printStackTrace(); }
-         */
-        return dateString;
-    }
-
-    // private String getPassengerId(String lineText) {
-    // String passengerId = null;
-    // try {
-    // passengerId = lineText.substring(lineText.indexOf("<ns3:uniquePassengerReference>") + "<ns3:uniquePassengerReference>".length(), lineText.indexOf("</ns3:uniquePassengerReference>"));
-    // }
-    // catch (IndexOutOfBoundsException e) {
-    // return null;
-    // }
-    // return passengerId;
-    // }
-
-    private String getServiceName(String xmlPayload) {
-        String serviceName = null;
-        int bodyIndex = xmlPayload.indexOf("Body>") + 5;
-        String serviceNamePartOne = xmlPayload.substring(bodyIndex, xmlPayload.indexOf(" ", bodyIndex));
-        String serviceNamePartTwo = null;
-        if (!serviceNamePartOne.contains(">")) {
-            serviceNamePartTwo = serviceNamePartOne.substring(serviceNamePartOne.indexOf(":") + 1);
-            serviceName = serviceNamePartTwo;
-        }
-        else {
-            serviceName = serviceNamePartOne;
-        }
-        if (serviceName != null && serviceName.contains("<")) {
-            serviceName = serviceName.substring(serviceName.indexOf("<") + 1);
-        }
-        if (serviceName != null && serviceName.contains("Request")) {
-            serviceName = serviceName.substring(0, serviceName.indexOf("Request"));
-        }
-        else if (serviceName != null && serviceName.contains("Response")) {
-            serviceName = serviceName.substring(0, serviceName.indexOf("Response"));
-        }
-        else if (serviceName != null && serviceName.contains("_IN")) {
-            serviceName = serviceName.substring(0, serviceName.indexOf("_IN"));
-        }
-        else if (serviceName != null && serviceName.contains("_OUT")) {
-            serviceName = serviceName.substring(0, serviceName.indexOf("_OUT"));
-        }
-        return serviceName;
-    }
-
-    private String getSessionID(String lineText, String sessionIDPossition) {
-        String sessionID = new String();
-        String strs[] = lineText.split(" ");
-        sessionID = strs[Integer.valueOf(sessionIDPossition) - 1];
-        return sessionID;
     }
 
     private File getUnZipedFile(File file, String tempFileLocation) {
