@@ -145,6 +145,23 @@
 				<artifactId>servlet-api</artifactId>
 				<version>2.5</version>
 			</dependency>
+			
+			<!-- logback dependencies -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>${logback.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>${logback.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -153,7 +170,8 @@
 		<quartz.version>1.8.6</quartz.version>
 		<commons.version>3.1</commons.version>
 		<spring.batch.version>2.1.8.RELEASE</spring.batch.version>
-		
+		<slf4j.version>1.6.4</slf4j.version>
+		<logback.version>1.0.1</logback.version>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 	</properties>
 	<modules>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	 
+	<configuration>
+	 
+	  <appender name="application_log_appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+	    <!-- encoders are assigned the type
+	         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+	    <encoder>
+	      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+	    </encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      		<FileNamePattern>C:/dev/vinod/data/logs/application_log_%d.log</FileNamePattern>
+    	</rollingPolicy>
+	  </appender>
+	 
+	  <logger name="com.tcs.klm" level="DEBUG">
+	    <appender-ref ref="application_log_appender"/>
+		<appender-ref ref="ASYNC"/>
+	  </logger>
+	  
+	   <logger name="application_log" level="DEBUG">
+		    <appender-ref ref="application_log_appender"/>
+			<appender-ref ref="ASYNC"/>
+		 </logger>
+	</configuration>

@@ -84,10 +84,24 @@
 			<artifactId>cglib</artifactId>
 		</dependency>
 		
+		
 		<!-- need to make JSON object to browser compatable-->
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
+		</dependency>
+		<!-- logback dependencies -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
 		</dependency>
 		
 		<!-- internal dependencies -->
@@ -96,24 +110,5 @@
 			<artifactId>LS-domain</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
-		<dependency>
-		  <groupId>javax.servlet</groupId>
-		  <artifactId>jstl</artifactId>
-		  <version>1.2</version>
-</dependency>
-<dependency>
-  <groupId>taglibs</groupId>
-  <artifactId>standard</artifactId>
-  <version>1.1.2</version>
-</dependency>
-		<dependency>
-			<groupId>displaytag</groupId>
-			<artifactId>displaytag</artifactId>
-			<version>1.1</version>
-			<scope>compile</scope>
-		</dependency>
-
-	
 	</dependencies>
 </project>
