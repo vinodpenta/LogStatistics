@@ -4,7 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -75,7 +77,7 @@ public class DownloadThread implements Runnable {
                 System.out.println(hyperLink);
                 (new File(downloadLocation)).mkdirs();
                 String fileName = downloadLocation + hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
-                fileName = fileName.replace(".gz", ".log.gz");
+                fileName = fileName.replace(".gz", ".log");
                 BufferedInputStream isTextOrTail = new BufferedInputStream(getMethodLog.getResponseBodyAsStream());
                 saveFileContent(isTextOrTail, fileName);
                 // downloadSuccessFlag = true;
@@ -97,14 +99,15 @@ public class DownloadThread implements Runnable {
     private void saveFileContent(BufferedInputStream isTextOrTail, String fileName) {
         OutputStream out = null;
         File targetFile = new File(fileName);
+
         System.out.println("Downloading file " + targetFile.getPath());
         try {
-
+            GZIPInputStream gzis = new GZIPInputStream(isTextOrTail);
             out = new FileOutputStream(targetFile);
             byte[] buf = new byte[32 * 1024];
             int len;
 
-            while ((len = isTextOrTail.read(buf)) > 0) {
+            while ((len = gzis.read(buf)) > 0) {
                 out.write(buf, 0, len);
             }
 

@@ -2,8 +2,6 @@ package com.tcs.klm.fancylog.thread;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -13,7 +11,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -55,11 +52,11 @@ public class AnalysisThread implements Runnable {
     @Override
     public void run() {
         try {
-            File tmpFile = getUnZipedFile(file, tempFileLocation);
+            // File tmpFile = getUnZipedFile(file, tempFileLocation);
             Calendar calendar = Calendar.getInstance();
             String year = calendar.get(Calendar.YEAR) + "";
-            if (tmpFile != null) {
-                BufferedReader br = new BufferedReader(new FileReader(tmpFile));
+            if (file != null) {
+                BufferedReader br = new BufferedReader(new FileReader(file));
                 StringBuffer sbf = new StringBuffer();
                 String sCurrentLine = null;
                 while ((sCurrentLine = br.readLine()) != null) {
@@ -68,6 +65,7 @@ public class AnalysisThread implements Runnable {
                             processLastLine(sbf.toString(), sessionIDPossition, year, file.getName());
                         }
                         catch (Exception e) {
+                            System.out.println(sbf.toString());
                             e.printStackTrace();
                         }
                         sbf.delete(0, sbf.length());
@@ -79,38 +77,19 @@ public class AnalysisThread implements Runnable {
                 }
                 br.close();
             }
-            tmpFile.delete();
+            file.delete();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private File getUnZipedFile(File file, String tempFileLocation) {
-        File tempfile = null;
-        try {
-            GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(file));
-            String fileName = file.getName();
-            fileName = fileName.replace("gz", "log");
-            System.out.println(tempFileLocation);
-            String unzipfilepath = tempFileLocation + fileName;
-            System.out.println(unzipfilepath);
-            FileOutputStream out = new FileOutputStream(unzipfilepath);
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = gzis.read(buffer)) > 0) {
-                out.write(buffer, 0, len);
-            }
-            gzis.close();
-            out.close();
-            System.out.println(unzipfilepath);
-            tempfile = new File(unzipfilepath);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return tempfile;
-    }
+    /*
+     * private File getUnZipedFile(File file, String tempFileLocation) { File tempfile = null; try { GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(file)); String fileName = file.getName(); fileName =
+     * fileName.replace("gz", "log"); System.out.println(tempFileLocation); String unzipfilepath = tempFileLocation + fileName; System.out.println(unzipfilepath); FileOutputStream out = new
+     * FileOutputStream(unzipfilepath); byte[] buffer = new byte[1024]; int len; while ((len = gzis.read(buffer)) > 0) { out.write(buffer, 0, len); } gzis.close(); out.close(); System.out.println(unzipfilepath); tempfile
+     * = new File(unzipfilepath); } catch (Exception ex) { ex.printStackTrace(); } return tempfile; }
+     */
 
     private void processLastLine(String lineText, String sessionIDPossition, String year, String fileName) throws IOException {
         if (lineText.startsWith(year) && lineText.endsWith("Envelope>")) {
