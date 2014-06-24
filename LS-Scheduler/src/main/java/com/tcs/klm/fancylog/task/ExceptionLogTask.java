@@ -1,5 +1,6 @@
 package com.tcs.klm.fancylog.task;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -7,22 +8,34 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.tcs.klm.fancylog.thread.DownloadThread;
+import com.tcs.klm.fancylog.thread.ExceptionAnalysisThread;
 
 public class ExceptionLogTask {
+
+    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(ExceptionLogTask.class);
 
     @Autowired
     private MongoTemplate mongoTemplate;
     private static final String COLLECTION_SETTINGS = "settings";
+    private String COLLECTION_EXCEPTION = "exception";
 
     public void perfoemTask() {
         System.out.println("ExceptionLogTask");
@@ -43,7 +56,10 @@ public class ExceptionLogTask {
             String userName = (String) settings.get("userName");
             String passWord = (String) settings.get("passWord");
             String fileName = (String) settings.get("fileName");
+            String fileNames[] = StringUtils.split(fileName, ",");
             String downloadLocation = (String) settings.get("downloadLocation");
+            String[] names = StringUtils.split(downloadLocation, "/");
+            String exceptionFileLocation = downloadLocation.replace(names[names.length - 1], "exception");
             List<String> lstHyeperLink = new ArrayList<String>();
 
             HttpClient httpClient = getAuthenticatedHttpClient(logInURL, userName, passWord);
@@ -52,8 +68,140 @@ public class ExceptionLogTask {
             calendar1.add(Calendar.DAY_OF_MONTH, -1);
             Date yesterday = calendar1.getTime();
             // needs to change date format
-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH");
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             String date = formatter.format(yesterday);
+            String logFileURL = null;
+            if (httpClient != null) {
+                fancyLogURLPattern = fancyLogURLPattern.replace("<host>", host);
+                fancyLogURLPattern = fancyLogURLPattern.replace("<instance>", instance);
+                fancyLogURLPattern = fancyLogURLPattern.replace("<applicationName>", applicationName);
+                for (String node : nodes) {
+                    String fancyLogURL = fancyLogURLPattern.replace("<node>", node);
+                    String responseStream = getFancyLogMainPage(httpClient, fancyLogURL);
+                    if (responseStream != null) {
+                        Pattern regexPattern = Pattern.compile("<a\\s[^>]*href\\s*=\\s*\\\"([^\"]*)\"[^>]*>(.*?)</a>");
+                        Matcher matcher = regexPattern.matcher(responseStream);
+                        while (matcher.find()) {
+                            logFileURL = matcher.group(1);
+                            if (isValid(logFileURL, fileNames, date)) {
+                                lstHyeperLink.add(logFileURL);
+                            }
+                        }
+
+                    }
+                }
+                starFileDownload(logInURL, userName, passWord, lstHyeperLink, exceptionFileLocation);
+                File[] exceptionFiles = getListOfFiles(exceptionFileLocation);
+                if (exceptionFiles != null) {
+                    try {
+                        Runnable task;
+                        List<Thread> threads = new ArrayList<Thread>();
+                        for (File file : exceptionFiles) {
+                            task = new ExceptionAnalysisThread(file, sessionIDPossition, mongoTemplate);
+                            Thread thread = new Thread(task);
+                            thread.start();
+                            threads.add(thread);
+                        }
+                        for (Thread thread : threads) {
+                            thread.join();
+                        }
+
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    File gzfolder = new File(exceptionFileLocation);
+                    FancyLogAnalysisTask.deleteDirectory(gzfolder);
+                }
+
+            }
+            Object value = settings.get("noOfDays");
+            if (value != null) {
+                int noOfDays = Integer.valueOf(value.toString());
+                calendar.add(Calendar.HOUR_OF_DAY, -noOfDays * 24 * 10);
+                Date today = calendar.getTime();
+                formatter = new SimpleDateFormat("yyyy-MM-dd HH");
+                date = formatter.format(today);
+                DBCollection dbCollectionLog = mongoTemplate.getCollection(COLLECTION_EXCEPTION);
+                BasicDBObject searchQuery = new BasicDBObject();
+                searchQuery.put("date", date);
+                dbCollectionLog.remove(searchQuery);
+            }
+
+        }
+    }
+
+    private static File[] getListOfFiles(String directoryPath) {
+        File folder = new File(directoryPath);
+        File[] listOfFiles = folder.listFiles();
+        return listOfFiles;
+    }
+
+    private boolean starFileDownload(String logInURL, String userName, String passWord, List<String> listHyeperLink, String downloadLocation) {
+        boolean downloadSuccessFlag = false;
+        if (listHyeperLink != null && !listHyeperLink.isEmpty()) {
+            try {
+                Runnable task;
+                APPLICATION_LOGGER.info("Download Started... {}", System.currentTimeMillis());
+                List<Thread> threads = new ArrayList<Thread>();
+                /*
+                 * ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor(); taskExecutor.setCorePoolSize(4); taskExecutor.setMaxPoolSize(20); taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+                 */
+                for (String hyperLink : listHyeperLink) {
+                    task = new DownloadThread(logInURL, userName, passWord, hyperLink, downloadLocation);
+                    Thread thread = new Thread(task);
+                    thread.start();
+                    threads.add(thread);
+                    // taskExecutor.execute(task);
+                }
+                for (Thread thread : threads) {
+
+                    thread.join();
+
+                }
+            }
+            catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        APPLICATION_LOGGER.info("Download Completed...  >> {} ", System.currentTimeMillis());
+        return downloadSuccessFlag;
+    }
+
+    private boolean isValid(String logFileURL, String[] fileNames, String date) {
+        boolean flag = false;
+        flag = (logFileURL.contains(".gz") || logFileURL.contains(".zip")) && logFileURL.contains("action=redir") && logFileURL.contains("oldlogs") && logFileURL.contains(date);
+        if (flag && fileNames != null) {
+            for (String fileName : fileNames)
+                flag = logFileURL.contains(fileName);
+        }
+        else {
+            flag = false;
+        }
+        return flag;
+    }
+
+    private String getFancyLogMainPage(HttpClient httpClient, String strFancyLogMainURL) {
+        String responseString = null;
+        GetMethod getMethod = new GetMethod(strFancyLogMainURL);
+        int code = 0;
+        try {
+            code = httpClient.executeMethod(getMethod);
+            responseString = getMethod.getResponseBodyAsString();
+        }
+        catch (HttpException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (code != 200) {
+            APPLICATION_LOGGER.error("unable to access fancy log main page");
+            return null;
+        }
+        else {
+            return responseString;
         }
     }
 

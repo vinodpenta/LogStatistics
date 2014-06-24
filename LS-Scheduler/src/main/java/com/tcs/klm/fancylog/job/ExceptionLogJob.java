@@ -14,9 +14,7 @@ public class ExceptionLogJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        System.out.println("123");
         exceptionLogTask.perfoemTask();
-
     }
 
     public void setExceptionLogTask(ExceptionLogTask exceptionLogTask) {

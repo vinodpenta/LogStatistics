@@ -92,6 +92,6 @@
 	
 	<bean id="exceptionLogTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="exceptionLogJob" />
-		<property name="cronExpression" value="50 50 1 1 * ?"/>
+		<property name="cronExpression" value="50 50 1 * * ?"/>
 	</bean>
 </beans>
