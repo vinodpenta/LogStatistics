@@ -55,7 +55,7 @@ public class ExceptionLogTask {
             String logInURL = (String) settings.get("logInURL");
             String userName = (String) settings.get("userName");
             String passWord = (String) settings.get("passWord");
-            String fileName = (String) settings.get("fileName");
+            String fileName = (String) settings.get("exceptionFiles");
             String fileNames[] = StringUtils.split(fileName, ",");
             String downloadLocation = (String) settings.get("downloadLocation");
             String[] names = StringUtils.split(downloadLocation, "/");
