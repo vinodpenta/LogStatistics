@@ -54,7 +54,7 @@ public class GetMealOffer extends LogAnalyzer {
                 logKey.setChannel(channel);
                 logKey.setHost(host);
                 logKey.setMarket(market);
-                logKey.setServiceName("GetSeatOffer");
+                logKey.setServiceName("GetMealOffer");
                 lstLogKey.add(logKey);
             }
 

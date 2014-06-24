@@ -58,7 +58,7 @@ public class GetBaggageOffer extends LogAnalyzer {
                 logKey.setChannel(channel);
                 logKey.setHost(host);
                 logKey.setMarket(market);
-                logKey.setServiceName("GetSeatOffer");
+                logKey.setServiceName("GetBaggageOffer");
                 lstLogKey.add(logKey);
             }
 
