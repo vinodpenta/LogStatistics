@@ -2,6 +2,8 @@ package com.tcs.klm.fancylog.job;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.tcs.klm.fancylog.task.FancyLogAnalysisTask;
@@ -11,6 +13,8 @@ public class FancyLogAnalysisJob extends QuartzJobBean {
 
     private FancyLogAnalysisTask fancyLogAnalysisTask;
 
+    private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(FancyLogAnalysisJob.class);
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         if (FancySharedInfo.getInstance().isLastTaskSuccessful()) {
@@ -19,7 +23,7 @@ public class FancyLogAnalysisJob extends QuartzJobBean {
                     fancyLogAnalysisTask.performTask();
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
+                    APPLICATION_LOGGER.error(e.toString());
                 }
             }
         }
