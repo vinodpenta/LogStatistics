@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.SAXParserFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
@@ -28,7 +27,6 @@ public class GetSeatOffer extends LogAnalyzer {
     public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
         String value = null;
         List<LogKey> lstLogKey = new ArrayList<LogKey>();
@@ -75,7 +73,6 @@ public class GetSeatOffer extends LogAnalyzer {
     public LogKey getLogKeyFromResponse(String xmlPayload) {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
         String value = null;
         LogKey logKey = null;
