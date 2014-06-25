@@ -44,7 +44,7 @@
                 listAction: '../config/exceptions'
             },
             fields: {
-                className: {
+            	className: {
                     title: 'Class Name',
                     width: '8%'
                     
@@ -74,7 +74,7 @@
 <body>
 	<%@include file="jspf/header.jspf"%>
 	<div class="bs-example page-fancylog">
-		<%@include file="jspf/exceptionmenu.jspf"%>
+		<%-- <%@include file="jspf/exceptionmenu.jspf"%> --%>
 		<nav class="navbar navbar-default" role="navigation">
 		<div class="control-group">
         	<label for="date-picker-2" class="control-label">Select Date</label>
