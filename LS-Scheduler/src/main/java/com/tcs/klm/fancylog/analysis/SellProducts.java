@@ -101,7 +101,7 @@ public class SellProducts extends LogAnalyzer {
             builder = builderFactory.newDocumentBuilder();
             Document doc = builder.parse(new InputSource(new StringReader(xmlPayloadNameSpaceRemoved)));
             XPath xPath = XPathFactory.newInstance().newXPath();
-            value = xPath.compile("/Envelope/Body/GetSeatOfferResponse/errorItem/errorCode").evaluate(doc);
+            value = xPath.compile("/Envelope/Body/SellProductsResponse/errorItem/errorCode").evaluate(doc);
             if (value != null && value.length() > 0) {
                 logKey = new LogKey();
                 logKey.setErrorCode(value);
