@@ -87,8 +87,7 @@ public class FancyLogAnalysisTask {
                 catch (Exception e) {
                     e.printStackTrace();
                 }
-                File gzfolder = new File(gzFileLocation);
-                deleteDirectory(gzfolder);
+
             }
             Object value = settings.get("noOfDays");
             if (value != null) {
