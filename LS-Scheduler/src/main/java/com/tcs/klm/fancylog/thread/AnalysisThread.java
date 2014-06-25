@@ -165,7 +165,7 @@ public class AnalysisThread implements Runnable {
                     lstTempLogs.remove(sessionID);
                 }
             }
-            else if (lineText.contains(".CONSUMER_RE")) {
+            else {
                 sessionID = getSessionID(lineText, sessionIDPossition);
                 // Set<String> keySet = lstTmpsessionMap.keySet();
                 if (lstTmpKeys.containsKey(sessionID)) {
