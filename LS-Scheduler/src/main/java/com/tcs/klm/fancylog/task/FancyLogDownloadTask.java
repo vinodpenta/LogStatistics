@@ -14,7 +14,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +52,6 @@ public class FancyLogDownloadTask {
             String userName = (String) object.get("userName");
             String passWord = (String) object.get("passWord");
             String fileName = (String) object.get("fileName");
-            String fileNames[] = StringUtils.split(fileName, ",");
             String downloadLocation = (String) object.get("downloadLocation");
             List<String> lstHyeperLink = new ArrayList<String>();
 
@@ -78,7 +76,7 @@ public class FancyLogDownloadTask {
                         Matcher matcher = regexPattern.matcher(responseStream);
                         while (matcher.find()) {
                             logFileURL = matcher.group(1);
-                            if (isValid(logFileURL, fileNames, date)) {
+                            if (isValid(logFileURL, fileName, date)) {
                                 lstHyeperLink.add(logFileURL);
                             }
                         }
@@ -124,16 +122,9 @@ public class FancyLogDownloadTask {
         return downloadSuccessFlag;
     }
 
-    private boolean isValid(String logFileURL, String[] fileNames, String date) {
+    private boolean isValid(String logFileURL, String fileName, String date) {
         boolean flag = false;
-        flag = (logFileURL.contains(".gz") || logFileURL.contains(".zip")) && logFileURL.contains("action=redir") && logFileURL.contains("oldlogs") && logFileURL.contains(date);
-        if (flag && fileNames != null) {
-            for (String fileName : fileNames)
-                flag = logFileURL.contains(fileName);
-        }
-        else {
-            flag = false;
-        }
+        flag = (logFileURL.contains(".gz") || logFileURL.contains(".zip")) && logFileURL.contains("action=redir") && logFileURL.contains("oldlogs") && logFileURL.contains(fileName) && logFileURL.contains(date);
         return flag;
     }
 
