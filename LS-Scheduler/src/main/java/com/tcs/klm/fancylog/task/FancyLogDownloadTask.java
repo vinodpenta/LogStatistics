@@ -1,5 +1,6 @@
 package com.tcs.klm.fancylog.task;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -55,6 +56,7 @@ public class FancyLogDownloadTask {
             String downloadLocation = (String) object.get("downloadLocation");
             List<String> lstHyeperLink = new ArrayList<String>();
 
+            FancyLogAnalysisTask.deleteDirectory(new File(downloadLocation));
             HttpClient httpClient = getAuthenticatedHttpClient(logInURL, userName, passWord);
 
             Calendar calendar = Calendar.getInstance();
