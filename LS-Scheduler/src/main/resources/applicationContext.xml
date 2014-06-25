@@ -87,7 +87,7 @@
 
 	<bean id="analyzeTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="analyzeJob" />
-		<property name="cronExpression" value="50 27 0/1 * * ?" />
+		<property name="cronExpression" value="0 32 0/1 * * ?" />
 	</bean>
 	
 	<bean id="exceptionLogTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
