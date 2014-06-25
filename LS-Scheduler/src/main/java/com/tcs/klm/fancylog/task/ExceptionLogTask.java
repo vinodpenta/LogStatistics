@@ -7,7 +7,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +28,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.tcs.klm.domain.ExceptionBean;
 import com.tcs.klm.fancylog.thread.DownloadThread;
 import com.tcs.klm.fancylog.thread.ExceptionAnalysisThread;
 
@@ -36,6 +40,7 @@ public class ExceptionLogTask {
     private MongoTemplate mongoTemplate;
     private static final String COLLECTION_SETTINGS = "settings";
     private String COLLECTION_EXCEPTION = "exception";
+    private String COLLECTION_EXCEPTION_COUNT = "exceptioncount";
 
     public void perfoemTask() {
         System.out.println("ExceptionLogTask");
@@ -61,7 +66,7 @@ public class ExceptionLogTask {
             String[] names = StringUtils.split(downloadLocation, "/");
             String exceptionFileLocation = downloadLocation.replace(names[names.length - 1], "exception");
             List<String> lstHyeperLink = new ArrayList<String>();
-
+            System.out.println(exceptionFileLocation);
             HttpClient httpClient = getAuthenticatedHttpClient(logInURL, userName, passWord);
 
             Calendar calendar1 = Calendar.getInstance();
@@ -70,6 +75,7 @@ public class ExceptionLogTask {
             // needs to change date format
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             String date = formatter.format(yesterday);
+            System.out.println(date);
             String logFileURL = null;
             if (httpClient != null) {
                 fancyLogURLPattern = fancyLogURLPattern.replace("<host>", host);
@@ -100,10 +106,11 @@ public class ExceptionLogTask {
                             task = new ExceptionAnalysisThread(file, sessionIDPossition, mongoTemplate);
                             Thread thread = new Thread(task);
                             thread.start();
+                            thread.join();
                             threads.add(thread);
                         }
                         for (Thread thread : threads) {
-                            thread.join();
+
                         }
 
                     }
@@ -115,18 +122,42 @@ public class ExceptionLogTask {
                 }
 
             }
-            Object value = settings.get("noOfDays");
-            if (value != null) {
-                int noOfDays = Integer.valueOf(value.toString());
-                calendar.add(Calendar.HOUR_OF_DAY, -noOfDays * 24 * 10);
-                Date today = calendar.getTime();
-                formatter = new SimpleDateFormat("yyyy-MM-dd HH");
-                date = formatter.format(today);
-                DBCollection dbCollectionLog = mongoTemplate.getCollection(COLLECTION_EXCEPTION);
-                BasicDBObject searchQuery = new BasicDBObject();
-                searchQuery.put("date", date);
-                dbCollectionLog.remove(searchQuery);
+            Map<String, ExceptionBean> exceptionBeanMap = new HashMap<String, ExceptionBean>();
+
+            BasicDBObject searchQuery = new BasicDBObject();
+            searchQuery.put("date", date);
+            DBCollection collection = mongoTemplate.getCollection(COLLECTION_EXCEPTION);
+            DBCursor cursor = collection.find(searchQuery);
+            while (cursor.hasNext()) {
+                String key;
+                DBObject object = cursor.next();
+                String className = (String) object.get("className");
+                String exception = null;
+                Object value = object.get("exception");
+                if (value != null) {
+                    exception = value.toString();
+                }
+                key = className + exception;
+                ExceptionBean exceptionBean = exceptionBeanMap.get(key);
+                if (exceptionBean != null) {
+                    exceptionBean.incrementCount();
+                }
+                else {
+                    ExceptionBean exceptionBean1 = new ExceptionBean();
+                    exceptionBean1.setClassName(className);
+                    exceptionBean1.setException(exception);
+                    exceptionBeanMap.put(key, exceptionBean1);
+                }
             }
+
+            List<ExceptionBean> exceptionBeans = new ArrayList<ExceptionBean>();
+            Set<String> keySet = exceptionBeanMap.keySet();
+            if (keySet != null) {
+                for (String key : keySet) {
+                    exceptionBeans.add(exceptionBeanMap.get(key));
+                }
+            }
+            mongoTemplate.insertAll(exceptionBeans);
 
         }
     }
@@ -155,9 +186,7 @@ public class ExceptionLogTask {
                     // taskExecutor.execute(task);
                 }
                 for (Thread thread : threads) {
-
                     thread.join();
-
                 }
             }
             catch (InterruptedException e) {
@@ -173,8 +202,12 @@ public class ExceptionLogTask {
         boolean flag = false;
         flag = (logFileURL.contains(".gz") || logFileURL.contains(".zip")) && logFileURL.contains("action=redir") && logFileURL.contains("oldlogs") && logFileURL.contains(date);
         if (flag && fileNames != null) {
-            for (String fileName : fileNames)
+            for (String fileName : fileNames) {
                 flag = logFileURL.contains(fileName);
+                if (flag)
+                    return true;
+            }
+
         }
         else {
             flag = false;

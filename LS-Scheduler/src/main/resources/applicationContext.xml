@@ -17,7 +17,7 @@
 	
     <!-- Factory bean that creates the Mongo instance -->
     <bean id="mongo" class="org.springframework.data.mongodb.core.MongoFactoryBean">
-        <property name="host" value="localhost" />
+        <property name="host" value="klm006726" />
     </bean>
      
     <!-- MongoTemplate for connecting and quering the documents in the database -->
@@ -82,16 +82,16 @@
 
 	<bean id="downloadTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="downloadJob" />
-		<property name="cronExpression" value="0 2 0/1 * * ?" />
+		<property name="cronExpression" value="0 2 1 * * ?" />
 	</bean>
 
 	<bean id="analyzeTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="analyzeJob" />
-		<property name="cronExpression" value="0 32 0/1 * * ?" />
+		<property name="cronExpression" value="0 32 1 * * ?" />
 	</bean>
 	
 	<bean id="exceptionLogTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="exceptionLogJob" />
-		<property name="cronExpression" value="50 50 1 * * ?"/>
+		<property name="cronExpression" value="50 13 0 * * ?"/>
 	</bean>
 </beans>

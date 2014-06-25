@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -44,14 +43,18 @@ public class ExceptionAnalysisThread implements Runnable {
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 StringBuffer sbf = new StringBuffer();
                 String sCurrentLine = null;
+                calendar.add(Calendar.DAY_OF_MONTH, -1);
+                DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                String date = formatter.format(calendar.getTime());
                 while ((sCurrentLine = br.readLine()) != null) {
                     if (sCurrentLine.startsWith(year)) {
                         try {
-                            processLastLine(sbf.toString(), year, file.getName());
+                            processLastLine(sbf.toString(), year, file.getName(), date);
                         }
                         catch (Exception e) {
                             APPLICATION_LOGGER.error(sbf.toString());
                             APPLICATION_LOGGER.error(e.getMessage());
+                            e.printStackTrace();
                         }
                         sbf.delete(0, sbf.length());
                         sbf.append(sCurrentLine + "\n");
@@ -70,14 +73,14 @@ public class ExceptionAnalysisThread implements Runnable {
 
     }
 
-    private void processLastLine(String lineText, String year, String name) {
+    private void processLastLine(String lineText, String year, String name, String date) {
         String sessionID = null;
         String className = null;
         String exception = null;
         String errorDescription = null;
         if (lineText.startsWith(year)) {
             sessionID = getString(lineText, Integer.valueOf(sessionIDPossition));
-            className = getString(lineText, 4);
+            className = getClassName(lineText);
             exception = getexception(lineText);
             errorDescription = getErrorDescription(lineText);
 
@@ -87,25 +90,41 @@ public class ExceptionAnalysisThread implements Runnable {
             exceptionKey.setException(exception);
             exceptionKey.setSessionID(sessionID);
             exceptionKey.setErrorDescription(errorDescription);
-
-            Date today = Calendar.getInstance().getTime();
-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            String date = formatter.format(today);
             exceptionKey.setDate(date);
             mongoTemplate.insert(exceptionKey, COLLECTION_EXCEPTION);
         }
     }
 
+    private String getClassName(String lineText) {
+        String string = new String();
+        String strs[] = lineText.split(" ");
+        string = strs[4];
+        String[] listString = StringUtils.split(string, ".");
+        String returnValue = null;
+        if (listString != null) {
+            for (String st : listString) {
+                returnValue = st;
+            }
+        }
+        return returnValue;
+    }
+
     private String getErrorDescription(String lineText) {
-        String firstLine = lineText.substring(121);
+        String firstLine = lineText.substring(120);
         String strs[] = StringUtils.split(firstLine, "\n");
         String errorDescription = strs[0];
         return errorDescription;
     }
 
     private String getexception(String lineText) {
-        String strs[] = StringUtils.split(lineText, "\n");
-        String exception = strs[1];
+        String exception = null;
+        try {
+            String strs[] = StringUtils.split(lineText, "\n");
+            exception = strs[1];
+        }
+        catch (Exception e) {
+            exception = null;
+        }
         return exception;
     }
 
