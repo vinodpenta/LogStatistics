@@ -35,10 +35,10 @@ public class SearchLogsService {
         BasicDBObject searchQuery = new BasicDBObject();
         searchQuery.put("PNR", pnr);
         DBCollection collection = mongoTemplate.getCollection(COLLECTION_TRANSACTION);
-        
+
         BasicDBObject sortOrder = new BasicDBObject();
-        sortOrder.put("date", 1); // order DESC 
-        
+        sortOrder.put("date", 1); // order DESC
+
         DBCursor cursor = collection.find(searchQuery).sort(sortOrder);
         List<LogKey> logKeys = new ArrayList<LogKey>();
         while (cursor.hasNext()) {
@@ -106,7 +106,6 @@ public class SearchLogsService {
         if (str == null || str.length() == 0) {
             return str;
         }
-        // System.out.println("Input String length : " + str.length());
         GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(str.getBytes("ISO-8859-1")));
         BufferedReader bf = new BufferedReader(new InputStreamReader(gis, "ISO-8859-1"));
         String outStr = "";
@@ -114,7 +113,6 @@ public class SearchLogsService {
         while ((line = bf.readLine()) != null) {
             outStr += line;
         }
-        // System.out.println("Output String lenght : " + outStr.length());
         return outStr;
     }
 }
