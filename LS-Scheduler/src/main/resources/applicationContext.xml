@@ -14,6 +14,7 @@
 	<context:component-scan base-package="com.tcs.klm.fancylog.*" />
 	<context:annotation-config />
 	<mvc:annotation-driven/>
+	<!-- <context:property-placeholder location="file:C://dev//vinod//config//fancylog.properties" /> -->
 	
     <!-- Factory bean that creates the Mongo instance -->
     <bean id="mongo" class="org.springframework.data.mongodb.core.MongoFactoryBean">
@@ -26,51 +27,24 @@
         <constructor-arg name="databaseName" value="test" />
     </bean>
 
-	<!-- <util:map id="logAnalyzerMap" map-class="java.util.HashMap" 
-			key-type="java.lang.String" value-type="com.tcs.klm.fancylog.analysis.LogAnalyzer"> -->
-
-<!-- 	<util:properties id="environmentProperties" location="file:D://dev//config//mongodb-poc//environment.properties" />
-	<context:property-placeholder location="file:D://dev//config//mongodb-poc//environment.properties" /> -->
-
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="jobDetails">
 			<list>
-				<ref bean="downloadJob" />
-				<ref bean="analyzeJob" />
+				<ref bean="spsLogAnalyzerJob"/>
 				<ref bean="exceptionLogJob"/>
 			</list>
 		</property>
 		<property name="triggers">
 			<list>
-				<ref bean="downloadTrigger" />
-				<ref bean="analyzeTrigger" />
+				<ref bean="spsLogAnalyzerTrigger"/>
 				<ref bean="exceptionLogTrigger"/>
 			</list>
 		</property>
 	</bean>
 
- 	<bean id="fancyLogDownloadTask" class="com.tcs.klm.fancylog.task.FancyLogDownloadTask" />
-	<bean id="fancyLogAnalysisTask" class="com.tcs.klm.fancylog.task.FancyLogAnalysisTask" />
+	<bean id="spsLogAnalyzerTask" class="com.tcs.klm.fancylog.task.SPSLogAnalyzerTask" />
 	<bean id="exceptionLogTask" class="com.tcs.klm.fancylog.task.ExceptionLogTask"/>
 
-	<bean name="downloadJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="com.tcs.klm.fancylog.job.FancyLogDownloadJob" />
-		<property name="jobDataAsMap">
-			<map>
-				<entry key="fancyLogDownloadTask" value-ref="fancyLogDownloadTask" />
-			</map>
-		</property>
-	</bean>
-
-	<bean name="analyzeJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="com.tcs.klm.fancylog.job.FancyLogAnalysisJob" />
-		<property name="jobDataAsMap">
-			<map>
-				<entry key="fancyLogAnalysisTask" value-ref="fancyLogAnalysisTask" />
-			</map>
-		</property>
-	</bean>
-	
 	<bean name="exceptionLogJob" class="org.springframework.scheduling.quartz.JobDetailBean">
 		<property name="jobClass" value="com.tcs.klm.fancylog.job.ExceptionLogJob"/>
 		<property name="jobDataAsMap">
@@ -79,19 +53,24 @@
 			</map>
 		</property>
 	</bean>
-
-	<bean id="downloadTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<property name="jobDetail" ref="downloadJob" />
-		<property name="cronExpression" value="0 2 1 * * ?" />
-	</bean>
-
-	<bean id="analyzeTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<property name="jobDetail" ref="analyzeJob" />
-		<property name="cronExpression" value="0 32 1 * * ?" />
-	</bean>
 	
+	<bean name="spsLogAnalyzerJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+		<property name="jobClass" value="com.tcs.klm.fancylog.job.SPSLogAnalyzerJob" />
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="spsLogAnalyzerTask" value-ref="spsLogAnalyzerTask" />
+			</map>
+		</property>
+	</bean>
+
 	<bean id="exceptionLogTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="exceptionLogJob" />
-		<property name="cronExpression" value="50 13 0 * * ?"/>
+		<property name="cronExpression" value="50 30 2 * * ?"/>
 	</bean>
+	
+	<bean id="spsLogAnalyzerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="spsLogAnalyzerJob" />
+		<property name="cronExpression" value="0 20 0/1 * * ?" />
+	</bean>
+	
 </beans>
