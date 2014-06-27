@@ -97,7 +97,7 @@ public class SearchLogsService {
     private String formatLog(String log) {
         Calendar calendar = Calendar.getInstance();
         String year = calendar.get(Calendar.YEAR) + "";
-        String formattedLog = log.replaceAll("log.gz" + year + "-", "log.gz\n\n" + year + "-");
+        String formattedLog = log.replaceAll(".log" + year + "-", ".gz\n\n" + year + "-");
         formattedLog = formattedLog.replaceAll("Envelope>" + year + "-", "Envelope>\n" + year + "-");
         return formattedLog;
     }

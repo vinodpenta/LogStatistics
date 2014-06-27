@@ -3,8 +3,8 @@ package com.tcs.klm.web.domain;
 public class ExceptionBean {
 
     private String className;
-    private String exceptionDescription;
-    private int count = 0;
+    private String exception;
+    private int count = 1;
 
     public String getClassName() {
         return className;
@@ -14,20 +14,24 @@ public class ExceptionBean {
         this.className = className;
     }
 
-    public String getExceptionDescription() {
-        return exceptionDescription;
-    }
-
-    public void setExceptionDescription(String exceptionDescription) {
-        this.exceptionDescription = exceptionDescription;
-    }
-
     public int getCount() {
         return count;
     }
 
     public void incrementCount() {
         count++;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public String getException() {
+        return exception;
+    }
+
+    public void setException(String exception) {
+        this.exception = exception;
     }
 
 }

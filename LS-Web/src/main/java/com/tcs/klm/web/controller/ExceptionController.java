@@ -21,12 +21,12 @@ public class ExceptionController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public String list(@RequestParam
+    public Map<String, Object> list(@RequestParam
     String date) {
         Map<String, Object> searchResultsMap = new HashMap<String, Object>();
         searchResultsMap.put("Records", exceptionService.list(date));
         searchResultsMap.put("Result", "OK");
-        return "exceptions.jsp";
+        return searchResultsMap;
     }
 
 }

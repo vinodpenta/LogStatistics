@@ -26,7 +26,7 @@
 		
 		$(".date-picker").datepicker({
 			minDate : -10,
-			maxDate : "-1D",
+			maxDate : "0D",
 			autoclose: true
 		});
 
@@ -49,7 +49,7 @@
                     width: '8%'
                     
                 },
-                exceptionDescription: {
+                exception: {
                     title: 'Exception Description',
                     width: '50%'
                 },

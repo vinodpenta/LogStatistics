@@ -6,9 +6,10 @@ Class-Path: spring-core-3.2.3.RELEASE.jar commons-logging-1.1.1.jar sp
  r spring-expression-3.2.3.RELEASE.jar spring-web-3.2.3.RELEASE.jar sp
  ring-webmvc-3.2.3.RELEASE.jar servlet-api-2.5.jar mongo-java-driver-2
  .11.0.jar spring-data-mongodb-1.2.0.RELEASE.jar spring-tx-3.2.3.RELEA
- SE.jar spring-data-commons-1.5.0.RELEASE.jar slf4j-api-1.7.1.jar jcl-
+ SE.jar spring-data-commons-1.5.0.RELEASE.jar slf4j-api-1.6.4.jar jcl-
  over-slf4j-1.7.1.jar cglib-2.2.2.jar asm-3.3.1.jar jackson-mapper-asl
- -1.9.12.jar jackson-core-asl-1.9.12.jar LS-domain.jar jstl-1.2.jar st
- andard-1.1.2.jar displaytag-1.1.jar commons-collections-3.1.jar commo
- ns-lang-2.6.jar itext-1.3.jar commons-beanutils-1.7.0.jar
+ -1.9.12.jar jackson-core-asl-1.9.12.jar logback-classic-1.0.1.jar log
+ back-core-1.0.1.jar LS-domain.jar jstl-1.2.jar standard-1.1.2.jar dis
+ playtag-1.1.jar commons-collections-3.1.jar commons-lang-2.6.jar itex
+ t-1.3.jar commons-beanutils-1.7.0.jar
 

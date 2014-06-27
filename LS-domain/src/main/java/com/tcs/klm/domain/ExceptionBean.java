@@ -1,8 +1,8 @@
 package com.tcs.klm.domain;
 
-
 public class ExceptionBean {
 
+    private String date;
     private String className;
     private String exception;
     private int count = 1;
@@ -29,6 +29,14 @@ public class ExceptionBean {
 
     public void setException(String exception) {
         this.exception = exception;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
 }
