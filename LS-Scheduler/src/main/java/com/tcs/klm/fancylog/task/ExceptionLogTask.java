@@ -42,7 +42,7 @@ public class ExceptionLogTask {
     private String COLLECTION_EXCEPTION = "exception";
 
     public void perfoemTask() {
-        System.out.println("ExceptionLogTask");
+        APPLICATION_LOGGER.info("ExceptionLogTask started...");
         DBCollection settingsCollection = mongoTemplate.getCollection(COLLECTION_SETTINGS);
         DBCursor settingsCursor = settingsCollection.find();
         Calendar calendar = Calendar.getInstance();
@@ -105,11 +105,10 @@ public class ExceptionLogTask {
                             task = new ExceptionAnalysisThread(file, sessionIDPossition, mongoTemplate);
                             Thread thread = new Thread(task);
                             thread.start();
-                            thread.join();
                             threads.add(thread);
                         }
                         for (Thread thread : threads) {
-
+                            thread.join();
                         }
 
                     }
@@ -121,8 +120,8 @@ public class ExceptionLogTask {
                 }
 
             }
+            APPLICATION_LOGGER.info("Exception log download completed.. ");
             Map<String, ExceptionBean> exceptionBeanMap = new HashMap<String, ExceptionBean>();
-
             BasicDBObject searchQuery = new BasicDBObject();
             searchQuery.put("date", date);
             DBCollection collection = mongoTemplate.getCollection(COLLECTION_EXCEPTION);
@@ -158,6 +157,7 @@ public class ExceptionLogTask {
                 }
             }
             mongoTemplate.insertAll(exceptionBeans);
+            APPLICATION_LOGGER.info("ExceptionBean update completed...");
 
         }
     }
@@ -173,7 +173,7 @@ public class ExceptionLogTask {
         if (listHyeperLink != null && !listHyeperLink.isEmpty()) {
             try {
                 Runnable task;
-                APPLICATION_LOGGER.info("Download Started... {}", System.currentTimeMillis());
+                APPLICATION_LOGGER.info("Download Started... ");
                 List<Thread> threads = new ArrayList<Thread>();
                 /*
                  * ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor(); taskExecutor.setCorePoolSize(4); taskExecutor.setMaxPoolSize(20); taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
@@ -188,6 +188,7 @@ public class ExceptionLogTask {
                 for (Thread thread : threads) {
                     thread.join();
                 }
+                APPLICATION_LOGGER.info("Download ended... ");
             }
             catch (InterruptedException e) {
                 // TODO Auto-generated catch block

@@ -2,8 +2,11 @@ package com.tcs.klm.fancylog.thread;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -14,8 +17,8 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -41,18 +44,21 @@ public class DownloadAnalysisThread implements Runnable {
     private String sessionIDPossition;
     private Map<String, LogAnalyzer> logAnalyzerMap;
     private MongoTemplate mongoTemplate;
+    private String downloadLocation;
 
     private static Map<String, StringBuffer> lstTempLogs = new HashMap<String, StringBuffer>();
     private static Map<String, List<LogKey>> lstTmpKeys = new HashMap<String, List<LogKey>>();
     private String COLLECTION_TRANSACTION = "transactions";
     private String COLLECTION_LOGS = "logs";
 
-    public DownloadAnalysisThread(String logInURL, String userName, String passWord, String hyperLink, String sessionIDPossition, Map<String, LogAnalyzer> logAnalyzerMap, MongoTemplate mongoTemplate) {
+    public DownloadAnalysisThread(String logInURL, String userName, String passWord, String hyperLink, String sessionIDPossition, String downloadLocation, Map<String, LogAnalyzer> logAnalyzerMap,
+                    MongoTemplate mongoTemplate) {
         this.httpClient = FancySharedInfo.getInstance().getAuthenticatedHttpClient(logInURL, userName, passWord);
         this.hyperLink = hyperLink;
         this.sessionIDPossition = sessionIDPossition;
         this.logAnalyzerMap = logAnalyzerMap;
         this.mongoTemplate = mongoTemplate;
+        this.downloadLocation = downloadLocation;
     }
 
     @Override
@@ -64,35 +70,32 @@ public class DownloadAnalysisThread implements Runnable {
                 APPLICATION_LOGGER.info("response code 200");
                 int fileNameBeginIndex = hyperLink.indexOf("oldlogs/") + "oldlogs/".length();
                 int fileNameEndIndex = hyperLink.indexOf("&app=");
-                String fileName = hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
+                (new File(downloadLocation)).mkdirs();
+                String fileName = downloadLocation + hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
                 fileName = fileName.replace(".gz", ".log");
+                APPLICATION_LOGGER.info("proccessing {}", fileName);
                 BufferedInputStream isTextOrTail = new BufferedInputStream(getMethodLog.getResponseBodyAsStream());
-                analyzeFileContent(isTextOrTail, fileName);
-                isTextOrTail.close();
-                // downloadSuccessFlag = true;
+                downloadFileContent(isTextOrTail, fileName);
+                analizeFileContent(fileName);
+                APPLICATION_LOGGER.info("done with {}", fileName);
             }
             else {
                 APPLICATION_LOGGER.error("failed to download log file {}", hyperLink);
                 APPLICATION_LOGGER.error("Http Status Code : {}", code);
             }
         }
-        catch (HttpException e) {
-            e.printStackTrace();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
+        catch (Exception e) {
+            APPLICATION_LOGGER.error("" + e);
         }
 
     }
 
-    private void analyzeFileContent(BufferedInputStream isTextOrTail, String fileName) {
-        APPLICATION_LOGGER.info("Downloading and Analysing file {}", fileName);
+    private void analizeFileContent(String fileName) {
+        String year = Calendar.getInstance().get(Calendar.YEAR) + "";
         BufferedReader br = null;
-        GZIPInputStream gzis = null;
         try {
-            String year = Calendar.getInstance().get(Calendar.YEAR) + "";
-            gzis = new GZIPInputStream(isTextOrTail);
-            br = new BufferedReader(new InputStreamReader(gzis));
+            File file = new File(fileName);
+            br = new BufferedReader(new FileReader(file));
             StringBuffer sbf = new StringBuffer();
             String sCurrentLine = null;
             while ((sCurrentLine = br.readLine()) != null) {
@@ -112,19 +115,35 @@ public class DownloadAnalysisThread implements Runnable {
                 }
             }
         }
-        catch (IOException ex) {
-            ex.printStackTrace();
+        catch (Exception exception) {
+            APPLICATION_LOGGER.error("excetion occured while Analyzing {}", exception);
+        }
+
+    }
+
+    private void downloadFileContent(BufferedInputStream isTextOrTail, String fileName) {
+        APPLICATION_LOGGER.info("Downloading file {}", fileName);
+        GZIPInputStream gzis = null;
+        OutputStream out = null;
+        try {
+            File targetFile = new File(fileName);
+            gzis = new GZIPInputStream(isTextOrTail);
+            out = new FileOutputStream(targetFile);
+            IOUtils.copy(isTextOrTail, out);
+            APPLICATION_LOGGER.info("Downloading is finished file {}", fileName);
+        }
+        catch (Exception ex) {
+            APPLICATION_LOGGER.error("Exception in downloadAnalysisThread {}", ex);
         }
         finally {
             if (isTextOrTail != null) {
                 try {
                     isTextOrTail.close();
-                    br.close();
                     gzis.close();
 
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
+                    APPLICATION_LOGGER.error("" + e);
                 }
             }
         }
