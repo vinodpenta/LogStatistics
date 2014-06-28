@@ -59,6 +59,7 @@ public class SPSLogAnalyzerTask {
             String passWord = (String) settings.get("passWord");
             String fileName = (String) settings.get("fileName");
             String sessionIDPossition = (String) settings.get("sessionIdPosition");
+            String downloadLocation = (String) settings.get("downloadLocation");
             List<String> lstHyeperLink = new ArrayList<String>();
 
             HttpClient httpClient = FancySharedInfo.getInstance().getAuthenticatedHttpClient(logInURL, userName, passWord);
@@ -84,7 +85,7 @@ public class SPSLogAnalyzerTask {
                     }
                 }
                 if (!lstHyeperLink.isEmpty()) {
-                    starFileDownloadAndAnalysis(logInURL, userName, passWord, lstHyeperLink, sessionIDPossition);
+                    starFileDownloadAndAnalysis(logInURL, userName, passWord, lstHyeperLink, sessionIDPossition, downloadLocation);
                 }
             }
             FancySharedInfo.getInstance().incrementCalenderByOneHr();
@@ -110,13 +111,13 @@ public class SPSLogAnalyzerTask {
         }
     }
 
-    private void starFileDownloadAndAnalysis(String logInURL, String userName, String passWord, List<String> lstHyeperLink, String sessionIDPossition) {
+    private void starFileDownloadAndAnalysis(String logInURL, String userName, String passWord, List<String> lstHyeperLink, String sessionIDPossition, String downloadLocation) {
         APPLICATION_LOGGER.info("Download analysis Started... ");
         try {
             Runnable task;
             List<Thread> threads = new ArrayList<Thread>();
             for (String hyperLink : lstHyeperLink) {
-                task = new DownloadAnalysisThread(logInURL, userName, passWord, hyperLink, sessionIDPossition, logAnalyzerMap, mongoTemplate);
+                task = new DownloadAnalysisThread(logInURL, userName, passWord, hyperLink, sessionIDPossition, downloadLocation, logAnalyzerMap, mongoTemplate);
                 Thread thread = new Thread(task);
                 thread.start();
                 threads.add(thread);
