@@ -66,8 +66,10 @@ public class DownloadAnalysisThread implements Runnable {
                 int fileNameEndIndex = hyperLink.indexOf("&app=");
                 String fileName = hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
                 fileName = fileName.replace(".gz", ".log");
+                APPLICATION_LOGGER.info("proccessing {}",fileName);
                 BufferedInputStream isTextOrTail = new BufferedInputStream(getMethodLog.getResponseBodyAsStream());
                 analyzeFileContent(isTextOrTail, fileName);
+                APPLICATION_LOGGER.info("done with {}",fileName);
                 isTextOrTail.close();
                 // downloadSuccessFlag = true;
             }
@@ -77,10 +79,10 @@ public class DownloadAnalysisThread implements Runnable {
             }
         }
         catch (HttpException e) {
-            e.printStackTrace();
+            APPLICATION_LOGGER.error(""+e);
         }
         catch (IOException e) {
-            e.printStackTrace();
+        	APPLICATION_LOGGER.error(""+e);
         }
 
     }
@@ -112,8 +114,8 @@ public class DownloadAnalysisThread implements Runnable {
                 }
             }
         }
-        catch (IOException ex) {
-            ex.printStackTrace();
+        catch (Exception ex) {
+            APPLICATION_LOGGER.error("Exception in ListAvailableProductsController {}", ex);
         }
         finally {
             if (isTextOrTail != null) {
@@ -124,7 +126,7 @@ public class DownloadAnalysisThread implements Runnable {
 
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
+                	APPLICATION_LOGGER.error(""+e);
                 }
             }
         }

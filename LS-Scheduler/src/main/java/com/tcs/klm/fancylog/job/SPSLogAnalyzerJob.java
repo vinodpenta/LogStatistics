@@ -39,5 +39,6 @@ public class SPSLogAnalyzerJob extends QuartzJobBean implements StatefulJob {
             calendar = FancySharedInfo.getInstance().getCalendar();
             spsLogAnalyzerTask.performTask(calendar);
         }
+        APPLICATION_LOGGER.info("SPSLogAnalyzerJob end");
     }
 }

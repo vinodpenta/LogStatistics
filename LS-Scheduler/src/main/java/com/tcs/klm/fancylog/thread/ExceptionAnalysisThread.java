@@ -53,8 +53,7 @@ public class ExceptionAnalysisThread implements Runnable {
                         }
                         catch (Exception e) {
                             APPLICATION_LOGGER.error(sbf.toString());
-                            APPLICATION_LOGGER.error(e.getMessage());
-                            e.printStackTrace();
+                            APPLICATION_LOGGER.error(""+e);
                         }
                         sbf.delete(0, sbf.length());
                         sbf.append(sCurrentLine + "\n");
