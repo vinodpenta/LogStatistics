@@ -85,7 +85,7 @@ public class FancyLogAnalysisTask {
 
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
+                    APPLICATION_LOGGER.error("", e);
                 }
 
             }

@@ -40,7 +40,6 @@ public class ExceptionLogTask {
     private MongoTemplate mongoTemplate;
     private static final String COLLECTION_SETTINGS = "settings";
     private String COLLECTION_EXCEPTION = "exception";
-    private String COLLECTION_EXCEPTION_COUNT = "exceptioncount";
 
     public void perfoemTask() {
         System.out.println("ExceptionLogTask");
@@ -115,7 +114,7 @@ public class ExceptionLogTask {
 
                     }
                     catch (Exception e) {
-                        e.printStackTrace();
+                        APPLICATION_LOGGER.error("", e);
                     }
                     File gzfolder = new File(exceptionFileLocation);
                     FancyLogAnalysisTask.deleteDirectory(gzfolder);
@@ -146,6 +145,7 @@ public class ExceptionLogTask {
                     ExceptionBean exceptionBean1 = new ExceptionBean();
                     exceptionBean1.setClassName(className);
                     exceptionBean1.setException(exception);
+                    exceptionBean1.setDate(date);
                     exceptionBeanMap.put(key, exceptionBean1);
                 }
             }
@@ -191,7 +191,7 @@ public class ExceptionLogTask {
             }
             catch (InterruptedException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                APPLICATION_LOGGER.error("", e);
             }
         }
         APPLICATION_LOGGER.info("Download Completed...  >> {} ", System.currentTimeMillis());
@@ -224,10 +224,10 @@ public class ExceptionLogTask {
             responseString = getMethod.getResponseBodyAsString();
         }
         catch (HttpException e) {
-            e.printStackTrace();
+            APPLICATION_LOGGER.error("", e);
         }
         catch (IOException e) {
-            e.printStackTrace();
+            APPLICATION_LOGGER.error("", e);
         }
         if (code != 200) {
             APPLICATION_LOGGER.error("unable to access fancy log main page");
@@ -251,10 +251,10 @@ public class ExceptionLogTask {
                 System.out.println("Login Http Status " + code);
             }
             catch (HttpException e) {
-                e.printStackTrace();
+                APPLICATION_LOGGER.error("", e);
             }
             catch (IOException e) {
-                e.printStackTrace();
+                APPLICATION_LOGGER.error("", e);
             }
         }
         else {
