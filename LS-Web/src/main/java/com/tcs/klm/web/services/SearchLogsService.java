@@ -57,7 +57,7 @@ public class SearchLogsService {
             if (value != null) {
                 logKey.setDate(value.toString());
             }
-            value = object.get("errorcode");
+            value = object.get("errorCode");
             if (value != null) {
                 logKey.setErrorCode(value.toString());
             }
@@ -68,6 +68,20 @@ public class SearchLogsService {
             logKeys.add(logKey);
         }
         return logKeys;
+    }
+
+    public String getPNR(String id) {
+        DBCollection dbCollection = mongoTemplate.getCollection(COLLECTION_TRANSACTION);
+        BasicDBObject query = new BasicDBObject();
+        query.put("sessionID", id);
+        DBCursor cursor = dbCollection.find(query);
+        while (cursor.hasNext()) {
+            DBObject object = cursor.next();
+            String pnr = (String) object.get("PNR");
+            return pnr;
+        }
+        return null;
+
     }
 
     public String getLogs(String id) throws IOException {

@@ -1,6 +1,10 @@
 package com.tcs.klm.fancylog.task;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,10 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +31,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.tcs.klm.fancylog.analysis.LogAnalyzer;
-import com.tcs.klm.fancylog.thread.DownloadAnalysisThread;
+import com.tcs.klm.fancylog.thread.AnalysisThread;
 import com.tcs.klm.fancylog.utils.FancySharedInfo;
 
 @Component
@@ -61,7 +67,7 @@ public class SPSLogAnalyzerTask {
             String sessionIDPossition = (String) settings.get("sessionIdPosition");
             String downloadLocation = (String) settings.get("downloadLocation");
             List<String> lstHyeperLink = new ArrayList<String>();
-
+            APPLICATION_LOGGER.info("trying to loggin Fancylog main page");
             HttpClient httpClient = FancySharedInfo.getInstance().getAuthenticatedHttpClient(logInURL, userName, passWord);
 
             if (httpClient != null) {
@@ -85,7 +91,9 @@ public class SPSLogAnalyzerTask {
                     }
                 }
                 if (!lstHyeperLink.isEmpty()) {
-                    starFileDownloadAndAnalysis(logInURL, userName, passWord, lstHyeperLink, sessionIDPossition, downloadLocation);
+                    startFileDownload(lstHyeperLink, downloadLocation, httpClient);
+                    startFileAnalysis(downloadLocation, sessionIDPossition);
+                    // starFileDownloadAndAnalysis(logInURL, userName, passWord, lstHyeperLink, sessionIDPossition, downloadLocation);
                 }
             }
             FancySharedInfo.getInstance().incrementCalenderByOneHr();
@@ -111,26 +119,92 @@ public class SPSLogAnalyzerTask {
         }
     }
 
-    private void starFileDownloadAndAnalysis(String logInURL, String userName, String passWord, List<String> lstHyeperLink, String sessionIDPossition, String downloadLocation) {
-        APPLICATION_LOGGER.info("Download analysis Started... ");
+    private void startFileAnalysis(String downloadLocation, String sessionIDPossition) {
+        File[] files = getListOfFiles(downloadLocation);
+        if (files != null) {
+            try {
+                Runnable task;
+                List<Thread> threads = new ArrayList<Thread>();
+                for (File file : files) {
+                    task = new AnalysisThread(file, sessionIDPossition, logAnalyzerMap, mongoTemplate);
+                    Thread thread = new Thread(task);
+                    thread.start();
+                    threads.add(thread);
+                }
+                for (Thread thread : threads) {
+                    thread.join();
+                }
+
+            }
+            catch (Exception e) {
+                APPLICATION_LOGGER.error("", e);
+            }
+
+        }
+    }
+
+    private void startFileDownload(List<String> lstHyeperLink, String downloadLocation, HttpClient httpClient) {
+
+        boolean downloadSuccessFlag = false;
+        APPLICATION_LOGGER.info("Download Started...");
+        for (String hyperLink : lstHyeperLink) {
+            GetMethod getMethodLog = new GetMethod(hyperLink);
+            try {
+                int code = httpClient.executeMethod(getMethodLog);
+                if (code == 200) {
+                    APPLICATION_LOGGER.info("response code 200");
+                    (new File(downloadLocation)).mkdirs();
+                    int fileNameBeginIndex = hyperLink.indexOf("oldlogs/") + "oldlogs/".length();
+                    int fileNameEndIndex = hyperLink.indexOf("&app=");
+                    String fileName = downloadLocation + hyperLink.substring(fileNameBeginIndex, fileNameEndIndex);
+                    fileName = fileName.replace(".gz", ".log");
+                    BufferedInputStream isTextOrTail = new BufferedInputStream(getMethodLog.getResponseBodyAsStream());
+                    downloadFileContent(isTextOrTail, fileName);
+                    APPLICATION_LOGGER.info(hyperLink);
+
+                }
+                else {
+                    APPLICATION_LOGGER.info("failed to download log file " + hyperLink);
+                    APPLICATION_LOGGER.info("Http Status Code : " + code);
+                }
+            }
+            catch (HttpException e) {
+                e.printStackTrace();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        APPLICATION_LOGGER.info("Download Completed...  >> " + downloadSuccessFlag);
+    }
+
+    private void downloadFileContent(BufferedInputStream isTextOrTail, String fileName) {
+        APPLICATION_LOGGER.info("Downloading file {}", fileName);
+        GZIPInputStream gzis = null;
+        OutputStream out = null;
         try {
-            Runnable task;
-            List<Thread> threads = new ArrayList<Thread>();
-            for (String hyperLink : lstHyeperLink) {
-                task = new DownloadAnalysisThread(logInURL, userName, passWord, hyperLink, sessionIDPossition, downloadLocation, logAnalyzerMap, mongoTemplate);
-                Thread thread = new Thread(task);
-                thread.start();
-                threads.add(thread);
-            }
-            for (Thread thread : threads) {
-                thread.join();
+            File targetFile = new File(fileName);
+            gzis = new GZIPInputStream(isTextOrTail);
+            out = new FileOutputStream(targetFile);
+            IOUtils.copy(isTextOrTail, out);
+            APPLICATION_LOGGER.info("Downloading is finished file {}", fileName);
+        }
+        catch (Exception ex) {
+            APPLICATION_LOGGER.error("Exception in downloadAnalysisThread {}", ex);
+        }
+        finally {
+            if (isTextOrTail != null) {
+                try {
+                    isTextOrTail.close();
+                    gzis.close();
+
+                }
+                catch (Exception e) {
+                    APPLICATION_LOGGER.error("" + e);
+                }
             }
         }
-        catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        APPLICATION_LOGGER.info("Download analysis Completed...   ");
+
     }
 
     private boolean isValid(String logFileURL, String fileName, String date) {
@@ -160,6 +234,12 @@ public class SPSLogAnalyzerTask {
         else {
             return responseString;
         }
+    }
+
+    private static File[] getListOfFiles(String directoryPath) {
+        File folder = new File(directoryPath);
+        File[] listOfFiles = folder.listFiles();
+        return listOfFiles;
     }
 
 }

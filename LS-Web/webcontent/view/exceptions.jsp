@@ -13,7 +13,7 @@
 <link href="../static/bootstrap/css/docs.css" rel="stylesheet"/>
 
 <!-- JTable -->
-<link href="../static/jtable/themes/metro/blue/jtable.css" rel="stylesheet" type="text/css" />
+<link href="../static/jtable/themes/lightcolor/gray/jtable.css" rel="stylesheet" type="text/css" />
 <script src="../static/jtable/jquery.jtable.min.js"	type="text/javascript"></script>
  
 <!-- Custom styles for this template -->
@@ -26,7 +26,7 @@
 		
 		$(".date-picker").datepicker({
 			minDate : -10,
-			maxDate : "0D",
+			maxDate : "-1D",
 			autoclose: true
 		});
 
@@ -36,10 +36,10 @@
             //paging: true,
             //sorting: true,
             //defaultSorting: 'date ASC',
-            //selecting: true, //Enable selecting
+            selecting: true, //Enable selecting
             //multiselect: true, //Allow multiple selecting
             //selectingCheckboxes: true, //Show checkboxes on first column
-            //selectOnRowClick: false, //Enable this to only select using checkboxes
+            selectOnRowClick: true, //Enable this to only select using checkboxes
             actions: {
                 listAction: '../config/exceptions'
             },
@@ -57,9 +57,26 @@
                 	title: 'Count',
                 	width: '2%'
                 }
+            },
+            //Register to selectionChanged event to hanlde events
+            selectionChanged: function () {
+                //Get all selected rows
+                var $selectedRows = $('#ExceptionCountContainer').jtable('selectedRows');
+                $('#SelectedRowList').empty();
+                if ($selectedRows.length > 0) {
+                    //Show selected rows
+                    $selectedRows.each(function () {
+                        var record = $(this).data('record');
+                        var NWin = window.open("../view/exceptionpopup.jsp?ObjectId="+record.objectId,"popupWindow",'height=768,width=1366,left=10,top=10,titlebar=no,toolbar=no,menubar=no,location=no,directories=no,status=no');
+                        if (window.focus)
+                        {
+                              NWin.focus();
+                        }
+                    });
+                }
             }
         });
-		
+	
 		$('#date-picker-2').change(function(e) {
 			//e.preventDefault();
 			$('#ExceptionCountContainer').jtable('load', {
@@ -88,6 +105,32 @@
     	</div>
     	</nav>
     	<div id="ExceptionCountContainer"></div>
+    	
+<!-- Button trigger modal -->
+<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 	</div>
 </body>
 </html>

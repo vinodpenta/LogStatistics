@@ -74,7 +74,7 @@ public class FancyLogAnalysisTask {
                     Runnable task;
                     List<Thread> threads = new ArrayList<Thread>();
                     for (File file : files) {
-                        task = new AnalysisThread(file, tempFileLocation, sessionIDPossition, logAnalyzerMap, mongoTemplate);
+                        task = new AnalysisThread(file, sessionIDPossition, logAnalyzerMap, mongoTemplate);
                         Thread thread = new Thread(task);
                         thread.start();
                         threads.add(thread);

@@ -1,4 +1,4 @@
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -69,7 +69,7 @@
                     title: 'Error Code',
                     width: '5%'
                 },
-                error: {
+                errorDescription: {
                     title: 'Error Description(If any)',
                     width: '15%'
                 },
@@ -77,14 +77,14 @@
                 	title: ' ',
                 	width: '1%',
 					display : function(data) {
-						    	return '<a href="../config/searchLogs/logs?id='+data.record.sessionID+'"><span class="glyphicon glyphicon-open"></span></a>';
+						    	return '<a href="../config/searchLogs/logs?id='+data.record.sessionID+'" target="_blank"><span class="glyphicon glyphicon-floppy-open glyphicon-size"></span></a>';
 						    }
                 },
                 download: {
                 	title: ' ',
                 	width: '1%',
 					display : function(data) {
-					    	return '<a href="../config/searchLogs/download?id='+data.record.sessionID+'"><span class="glyphicon glyphicon-save"></span></a>';
+					    	return '<a href="../config/searchLogs/download?id='+data.record.sessionID+'"><span class="glyphicon glyphicon-save glyphicon-size"></span></a>';
 					    }
                 }
             }

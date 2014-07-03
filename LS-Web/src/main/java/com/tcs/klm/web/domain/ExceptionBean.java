@@ -2,6 +2,7 @@ package com.tcs.klm.web.domain;
 
 public class ExceptionBean {
 
+    private String objectId;
     private String className;
     private String exception;
     private int count = 1;
@@ -32,6 +33,14 @@ public class ExceptionBean {
 
     public void setException(String exception) {
         this.exception = exception;
+    }
+
+    public String getObjectId() {
+        return objectId;
+    }
+
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
     }
 
 }

@@ -5,10 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,6 @@ public class ExceptionService {
     private String COLLECTION_EXCEPTIONBEAN = "exceptionBean";
 
     public List<ExceptionBean> list(String date) {
-        Map<String, ExceptionBean> exceptionBeanMap = new HashMap<String, ExceptionBean>();
         BasicDBObject searchQuery = new BasicDBObject();
 
         DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
@@ -53,11 +51,10 @@ public class ExceptionService {
         DBCollection collection = mongoTemplate.getCollection(COLLECTION_EXCEPTIONBEAN);
         DBCursor cursor = collection.find(searchQuery).sort(sortOrder);
         while (cursor.hasNext()) {
-            String key;
             DBObject object = cursor.next();
-
             ExceptionBean exceptionBean = new ExceptionBean();
 
+            ObjectId objectId = (ObjectId) object.get("_id");
             String className = (String) object.get("className");
             String exception = null;
             String count = null;
@@ -72,6 +69,7 @@ public class ExceptionService {
             exceptionBean.setClassName(className);
             exceptionBean.setException(exception);
             exceptionBean.setCount(Integer.valueOf(count));
+            exceptionBean.setObjectId(objectId.toString());
             exceptionBeans.add(exceptionBean);
         }
 

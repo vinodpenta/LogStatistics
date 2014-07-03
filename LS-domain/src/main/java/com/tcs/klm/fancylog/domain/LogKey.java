@@ -18,8 +18,8 @@ public class LogKey {
         return PNR;
     }
 
-    public void setPNR(String pNR) {
-        PNR = pNR;
+    public void setPNR(String PNR) {
+        this.PNR = PNR;
     }
 
     public String getServiceName() {
@@ -94,12 +94,11 @@ public class LogKey {
         this.logID = logID;
     }
 
-	public String getSessionID() {
-		return sessionID;
-	}
+    public String getSessionID() {
+        return sessionID;
+    }
 
-	public void setSessionID(String sessionID) {
-		this.sessionID = sessionID;
-	}
-
+    public void setSessionID(String sessionID) {
+        this.sessionID = sessionID;
+    }
 }

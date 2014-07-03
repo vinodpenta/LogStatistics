@@ -56,7 +56,14 @@ public class SearchLogsController {
     public void download(@RequestParam
     final String id, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String log = searchLogsService.getLogs(id);
-        File file = new File("C:/temp/completelogs.txt");
+        String pnr = searchLogsService.getPNR(id);
+        File file = null;
+        if (pnr != null) {
+            file = new File("C:/temp/" + pnr + "_logs.txt");
+        }
+        else {
+            file = new File("C:/temp/completelogs.txt");
+        }
         if (!file.exists()) {
             file.createNewFile();
         }

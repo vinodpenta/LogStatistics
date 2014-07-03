@@ -70,7 +70,7 @@
 	
 	<bean id="spsLogAnalyzerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="spsLogAnalyzerJob" />
-		<property name="cronExpression" value="0 20 0/1 * * ?" />
+		<property name="cronExpression" value="15 2 0/1 * * ?" />
 	</bean>
 	
 </beans>

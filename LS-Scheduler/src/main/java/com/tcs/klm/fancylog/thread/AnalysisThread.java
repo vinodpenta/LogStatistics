@@ -23,6 +23,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.tcs.klm.fancylog.analysis.LogAnalyzer;
 import com.tcs.klm.fancylog.domain.LogKey;
+import com.tcs.klm.fancylog.utils.FancySharedInfo;
 import com.tcs.klm.fancylog.utils.Utils;
 
 @Component
@@ -36,7 +37,6 @@ public class AnalysisThread implements Runnable {
     private Map<String, LogAnalyzer> logAnalyzerMap;
 
     private File file;
-    private String tempFileLocation;
     private String sessionIDPossition;
 
     private static Map<String, StringBuffer> lstTempLogs = new HashMap<String, StringBuffer>();
@@ -45,9 +45,8 @@ public class AnalysisThread implements Runnable {
     private String COLLECTION_TRANSACTION = "transactions";
     private String COLLECTION_LOGS = "logs";
 
-    public AnalysisThread(File file, String tempFileLocation, String sessionIDPossition, Map<String, LogAnalyzer> logAnalyzerMap, MongoTemplate mongoTemplate) {
+    public AnalysisThread(File file, String sessionIDPossition, Map<String, LogAnalyzer> logAnalyzerMap, MongoTemplate mongoTemplate) {
         this.file = file;
-        this.tempFileLocation = tempFileLocation;
         this.sessionIDPossition = sessionIDPossition;
         this.logAnalyzerMap = logAnalyzerMap;
         this.mongoTemplate = mongoTemplate;
@@ -56,7 +55,6 @@ public class AnalysisThread implements Runnable {
     @Override
     public void run() {
         try {
-            // File tmpFile = getUnZipedFile(file, tempFileLocation);
             Calendar calendar = Calendar.getInstance();
             String year = calendar.get(Calendar.YEAR) + "";
             if (file != null) {
@@ -84,7 +82,7 @@ public class AnalysisThread implements Runnable {
             file.delete();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            APPLICATION_LOGGER.error("exception occured while analyzing {}", e);
         }
     }
 
@@ -95,9 +93,9 @@ public class AnalysisThread implements Runnable {
             String serviceName = null;
             String date = null;
             if (lineText.contains(".PROVIDER_REQUEST")) {
-                sessionID = getSessionID(lineText, sessionIDPossition);
-                serviceName = getServiceName(xmlPayload);
-                date = getDate(lineText);
+                sessionID = FancySharedInfo.getInstance().getSessionID(lineText, sessionIDPossition);
+                serviceName = FancySharedInfo.getInstance().getServiceName(xmlPayload);
+                date = FancySharedInfo.getInstance().getDate(lineText);
                 LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                 if (logAnalyzer != null) {
                     List<LogKey> logKeys = logAnalyzer.getLogKeyFromRequest(xmlPayload);
@@ -106,7 +104,6 @@ public class AnalysisThread implements Runnable {
                         sbfTemp.append(fileName).append("\n");
                         sbfTemp.append(lineText).append("\n");
                         for (LogKey logKey : logKeys) {
-                            // lstTmpsessionIdUPR.put(logKey.getPassengerId(), sessionID);
                             logKey.setSessionID(sessionID);
                             logKey.setDate(date);
                         }
@@ -116,10 +113,10 @@ public class AnalysisThread implements Runnable {
                 }
             }
             else if (lineText.contains(".PROVIDER_RESPONSE")) {
-                sessionID = getSessionID(lineText, sessionIDPossition);
+                sessionID = FancySharedInfo.getInstance().getSessionID(lineText, sessionIDPossition);
                 if (lstTmpKeys.containsKey(sessionID)) {
                     lstTempLogs.get(sessionID).append(lineText).append("\n");
-                    serviceName = getServiceName(xmlPayload);
+                    serviceName = FancySharedInfo.getInstance().getServiceName(xmlPayload);
                     LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                     if (logAnalyzer != null) {
                         LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload);
@@ -128,7 +125,6 @@ public class AnalysisThread implements Runnable {
                             for (LogKey logKey : logKeys) {
                                 logKey.setErrorCode(responseLogKey.getErrorCode());
                                 logKey.setErrorDescription(responseLogKey.getErrorDescription());
-                                // lstTmpsessionIdUPR.remove(logKey.getPassengerId());
                             }
                         }
                     }
@@ -155,10 +151,7 @@ public class AnalysisThread implements Runnable {
 
                     lstTmpKeys.remove(sessionID);
                     lstTempLogs.remove(sessionID);
-                    /*
-                     * List<String> wmSessionIDs = map.get(sessionID); if (wmSessionIDs != null) { for (String wmSessionID : wmSessionIDs) { //lstTmpsessionMap.remove(wmSessionID); } }
-                     */
-                    // map.remove(sessionID);
+
                 }
                 else {
                     lstTmpKeys.remove(sessionID);
@@ -166,90 +159,11 @@ public class AnalysisThread implements Runnable {
                 }
             }
             else {
-                sessionID = getSessionID(lineText, sessionIDPossition);
-                // Set<String> keySet = lstTmpsessionMap.keySet();
+                sessionID = FancySharedInfo.getInstance().getSessionID(lineText, sessionIDPossition);
                 if (lstTmpKeys.containsKey(sessionID)) {
                     lstTempLogs.get(sessionID).append(lineText).append("\n");
-                    /*
-                     * if (lineText.contains("GetEticketDetails.CONSUMER_RESPONSE")) { serviceName = getServiceName(xmlPayload); LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName); LogKey responseLogKey =
-                     * logAnalyzer.getLogKeyFromResponse(xmlPayload); if (responseLogKey != null) { List<LogKey> logKeys = lstTmpKeys.get(sessionID); for (LogKey logKey : logKeys) {
-                     * logKey.setPNR(responseLogKey.getPNR()); } } }
-                     */
                 }
-                /*
-                 * else if (keySet.contains(sessionID)) { String flowSessionId = lstTmpsessionMap.get(sessionID); if (lstTempLogs.get(flowSessionId) != null) lstTempLogs.get(flowSessionId).append(lineText).append("\n");
-                 * }
-                 */
-                /*
-                 * else { String passengerId = getPassengerId(lineText); if (passengerId != null) { String flowSessionId = lstTmpsessionIdUPR.get(passengerId); if (lstTempLogs.get(flowSessionId) != null) {
-                 * lstTempLogs.get(flowSessionId).append(lineText).append("\n"); lstTmpsessionMap.put(sessionID, flowSessionId); if (map.containsKey(flowSessionId)) { map.get(flowSessionId).add(sessionID); } else {
-                 * List<String> wmSessionIDs = new ArrayList<String>(); wmSessionIDs.add(sessionID); map.put(flowSessionId, wmSessionIDs); } } } }
-                 */
-
             }
         }
     }
-
-    private String getDate(String line) {
-        String dateString = null;
-        Calendar calendar = Calendar.getInstance();
-        if (line.startsWith(calendar.get(Calendar.YEAR) + "")) {
-            String strs[] = line.split(" ");
-            dateString = strs[0] + " " + strs[1];// line.substring(24, 47);
-        }
-        /*
-         * SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS"); Date date = null; try { date = sdf.parse(dateString); } catch (ParseException e) { // TODO Auto-generated catch block
-         * e.printStackTrace(); }
-         */
-        return dateString;
-    }
-
-    // private String getPassengerId(String lineText) {
-    // String passengerId = null;
-    // try {
-    // passengerId = lineText.substring(lineText.indexOf("<ns3:uniquePassengerReference>") + "<ns3:uniquePassengerReference>".length(), lineText.indexOf("</ns3:uniquePassengerReference>"));
-    // }
-    // catch (IndexOutOfBoundsException e) {
-    // return null;
-    // }
-    // return passengerId;
-    // }
-
-    private String getServiceName(String xmlPayload) {
-        String serviceName = null;
-        int bodyIndex = xmlPayload.indexOf("Body>") + 5;
-        String serviceNamePartOne = xmlPayload.substring(bodyIndex, xmlPayload.indexOf(" ", bodyIndex));
-        String serviceNamePartTwo = null;
-        if (!serviceNamePartOne.contains(">")) {
-            serviceNamePartTwo = serviceNamePartOne.substring(serviceNamePartOne.indexOf(":") + 1);
-            serviceName = serviceNamePartTwo;
-        }
-        else {
-            serviceName = serviceNamePartOne;
-        }
-        if (serviceName != null && serviceName.contains("<")) {
-            serviceName = serviceName.substring(serviceName.indexOf("<") + 1);
-        }
-        if (serviceName != null && serviceName.contains("Request")) {
-            serviceName = serviceName.substring(0, serviceName.indexOf("Request"));
-        }
-        else if (serviceName != null && serviceName.contains("Response")) {
-            serviceName = serviceName.substring(0, serviceName.indexOf("Response"));
-        }
-        else if (serviceName != null && serviceName.contains("_IN")) {
-            serviceName = serviceName.substring(0, serviceName.indexOf("_IN"));
-        }
-        else if (serviceName != null && serviceName.contains("_OUT")) {
-            serviceName = serviceName.substring(0, serviceName.indexOf("_OUT"));
-        }
-        return serviceName;
-    }
-
-    private String getSessionID(String lineText, String sessionIDPossition) {
-        String sessionID = new String();
-        String strs[] = lineText.split(" ");
-        sessionID = strs[Integer.valueOf(sessionIDPossition) - 1];
-        return sessionID;
-    }
-
 }
