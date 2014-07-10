@@ -82,13 +82,14 @@ public class SPSLogAnalyzerTask {
                 if (!lstHyeperLink.isEmpty()) {
                     starFileDownloadAndAnalysis(logInURL, userName, passWord, lstHyeperLink, sessionIDPossition, downloadLocation);
                 }
+                File file = new File(downloadLocation);
                 if (FancySharedInfo.getInstance().getFaildHyperLinks() != null) {
                     APPLICATION_LOGGER.info("retrying failed log files");
-                    File file = new File(downloadLocation);
                     FancySharedInfo.getInstance().deleteDirectory(file);
                     starFileDownloadAndAnalysis(logInURL, userName, passWord, FancySharedInfo.getInstance().getFaildHyperLinks(), sessionIDPossition, downloadLocation);
                     FancySharedInfo.getInstance().clearFaildHyperLinks();
                 }
+                FancySharedInfo.getInstance().deleteDirectory(file);
             }
             FancySharedInfo.getInstance().incrementCalenderByOneHr();
         }

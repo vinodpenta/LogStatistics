@@ -129,7 +129,7 @@ public class DownloadAnalysisThread implements Runnable {
             File targetFile = new File(fileName);
             gzis = new GZIPInputStream(isTextOrTail);
             out = new FileOutputStream(targetFile);
-            IOUtils.copy(isTextOrTail, out);
+            IOUtils.copy(gzis, out);
             APPLICATION_LOGGER.info("Downloading is finished file {}", fileName);
         }
         catch (Exception ex) {
