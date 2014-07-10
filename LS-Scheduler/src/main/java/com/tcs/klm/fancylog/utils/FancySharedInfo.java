@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -22,6 +24,7 @@ public class FancySharedInfo {
     private boolean isDownloadInProgress;
     private boolean isAnalysisInProgress;
     private Calendar calendar = null;
+    private List<String> faildHyperLinks = null;
 
     private static FancySharedInfo fancySharedInfo;
 
@@ -172,5 +175,20 @@ public class FancySharedInfo {
             dateString = strs[0] + " " + strs[1];// line.substring(24, 47);
         }
         return dateString;
+    }
+
+    public List<String> getFaildHyperLinks() {
+        return faildHyperLinks;
+    }
+
+    public void setFaildHyperLinks(String faildHyperLink) {
+        if (faildHyperLinks == null) {
+            faildHyperLinks = new ArrayList<String>();
+        }
+        faildHyperLinks.add(faildHyperLink);
+    }
+
+    public void clearFaildHyperLinks() {
+        faildHyperLinks = null;
     }
 }

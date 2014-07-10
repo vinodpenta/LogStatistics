@@ -134,6 +134,7 @@ public class DownloadAnalysisThread implements Runnable {
         }
         catch (Exception ex) {
             APPLICATION_LOGGER.error("Exception in downloadAnalysisThread {}", ex);
+            FancySharedInfo.getInstance().setFaildHyperLinks(hyperLink);
         }
         finally {
             if (isTextOrTail != null) {
