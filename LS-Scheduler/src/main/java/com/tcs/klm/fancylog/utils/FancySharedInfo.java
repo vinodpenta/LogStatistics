@@ -130,6 +130,13 @@ public class FancySharedInfo {
         return dateformat;
     }
 
+    public String getDay(Calendar calendar) {
+        Date time = calendar.getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String dateformat = dateFormat.format(time);
+        return dateformat;
+    }
+
     public String getServiceName(String xmlPayload) {
         String serviceName = null;
         int bodyIndex = xmlPayload.indexOf("Body>") + 5;

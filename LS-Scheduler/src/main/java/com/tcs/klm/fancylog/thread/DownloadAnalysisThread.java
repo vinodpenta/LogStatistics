@@ -48,8 +48,8 @@ public class DownloadAnalysisThread implements Runnable {
 
     private static Map<String, StringBuffer> lstTempLogs = new HashMap<String, StringBuffer>();
     private static Map<String, List<LogKey>> lstTmpKeys = new HashMap<String, List<LogKey>>();
-    private String COLLECTION_TRANSACTION = "transactions";
-    private String COLLECTION_LOGS = "logs";
+    private String COLLECTION_TRANSACTION;
+    private String COLLECTION_LOGS;
 
     public DownloadAnalysisThread(String logInURL, String userName, String passWord, String hyperLink, String sessionIDPossition, String downloadLocation, Map<String, LogAnalyzer> logAnalyzerMap,
                     MongoTemplate mongoTemplate) {
@@ -59,12 +59,15 @@ public class DownloadAnalysisThread implements Runnable {
         this.logAnalyzerMap = logAnalyzerMap;
         this.mongoTemplate = mongoTemplate;
         this.downloadLocation = downloadLocation;
+        COLLECTION_TRANSACTION = "transactions" + "_" + FancySharedInfo.getInstance().getDay(Calendar.getInstance());
+        COLLECTION_LOGS = "logs" + "_" + FancySharedInfo.getInstance().getDay(Calendar.getInstance());
     }
 
     @Override
     public void run() {
         GetMethod getMethodLog = new GetMethod(hyperLink);
         try {
+
             int code = httpClient.executeMethod(getMethodLog);
             if (code == 200) {
                 APPLICATION_LOGGER.info("response code 200");

@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.bson.types.ObjectId;
@@ -32,40 +34,44 @@ public class SearchLogsService {
     public List<LogKey> searchResults(String pnr) {
         // Query query = new Query();
         // query.addCriteria(Criteria.where("PNR").is(pnr));
+        List<LogKey> logKeys = new ArrayList<LogKey>();
         BasicDBObject searchQuery = new BasicDBObject();
         searchQuery.put("PNR", pnr);
-        DBCollection collection = mongoTemplate.getCollection(COLLECTION_TRANSACTION);
 
         BasicDBObject sortOrder = new BasicDBObject();
         sortOrder.put("date", 1); // order DESC
-
-        DBCursor cursor = collection.find(searchQuery).sort(sortOrder);
-        List<LogKey> logKeys = new ArrayList<LogKey>();
-        while (cursor.hasNext()) {
-            DBObject object = cursor.next();
-            LogKey logKey = new LogKey();
-            logKey.setChannel((String) object.get("channel"));
-            logKey.setPNR((String) object.get("PNR"));
-            logKey.setServiceName((String) object.get("serviceName"));
-            logKey.setHost((String) object.get("host"));
-            logKey.setMarket((String) object.get("market"));
-            Object value = object.get("sessionID");
-            if (value != null) {
-                logKey.setSessionID(value.toString());
+        Set<String> collectionSet = mongoTemplate.getCollectionNames();
+        List<String> collectionList = new ArrayList<String>(collectionSet);
+        Collections.sort(collectionList);
+        for (String collectionName : collectionList) {
+            DBCollection collection = mongoTemplate.getCollection(collectionName);
+            DBCursor cursor = collection.find(searchQuery).sort(sortOrder);
+            while (cursor.hasNext()) {
+                DBObject object = cursor.next();
+                LogKey logKey = new LogKey();
+                logKey.setChannel((String) object.get("channel"));
+                logKey.setPNR((String) object.get("PNR"));
+                logKey.setServiceName((String) object.get("serviceName"));
+                logKey.setHost((String) object.get("host"));
+                logKey.setMarket((String) object.get("market"));
+                Object value = object.get("sessionID");
+                if (value != null) {
+                    logKey.setSessionID(value.toString());
+                }
+                value = object.get("date");
+                if (value != null) {
+                    logKey.setDate(value.toString());
+                }
+                value = object.get("errorCode");
+                if (value != null) {
+                    logKey.setErrorCode(value.toString());
+                }
+                value = object.get("errorDescription");
+                if (value != null) {
+                    logKey.setErrorDescription(value.toString());
+                }
+                logKeys.add(logKey);
             }
-            value = object.get("date");
-            if (value != null) {
-                logKey.setDate(value.toString());
-            }
-            value = object.get("errorCode");
-            if (value != null) {
-                logKey.setErrorCode(value.toString());
-            }
-            value = object.get("errorDescription");
-            if (value != null) {
-                logKey.setErrorDescription(value.toString());
-            }
-            logKeys.add(logKey);
         }
         return logKeys;
     }
