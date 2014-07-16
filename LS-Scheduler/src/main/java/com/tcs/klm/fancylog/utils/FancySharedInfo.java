@@ -132,7 +132,7 @@ public class FancySharedInfo {
 
     public String getDay(Calendar calendar) {
         Date time = calendar.getTime();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         String dateformat = dateFormat.format(time);
         return dateformat;
     }
