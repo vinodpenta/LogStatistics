@@ -59,8 +59,8 @@ public class DownloadAnalysisThread implements Runnable {
         this.logAnalyzerMap = logAnalyzerMap;
         this.mongoTemplate = mongoTemplate;
         this.downloadLocation = downloadLocation;
-        COLLECTION_TRANSACTION = "transactions" + "_" + FancySharedInfo.getInstance().getDay(FancySharedInfo.getInstance().getCalendar());
-        COLLECTION_LOGS = "logs" + "_" + FancySharedInfo.getInstance().getDay(FancySharedInfo.getInstance().getCalendar());
+        COLLECTION_TRANSACTION = "transactions";// + "_" + FancySharedInfo.getInstance().getDay(FancySharedInfo.getInstance().getCalendar());
+        COLLECTION_LOGS = "logs";// + "_" + FancySharedInfo.getInstance().getDay(FancySharedInfo.getInstance().getCalendar());
     }
 
     @Override
