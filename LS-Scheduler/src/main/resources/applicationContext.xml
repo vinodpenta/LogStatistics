@@ -31,13 +31,13 @@
 		<property name="jobDetails">
 			<list>
 				<ref bean="spsLogAnalyzerJob"/>
-				<ref bean="exceptionLogJob"/>
+				<!-- <ref bean="exceptionLogJob"/> -->
 			</list>
 		</property>
 		<property name="triggers">
 			<list>
 				<ref bean="spsLogAnalyzerTrigger"/>
-				<ref bean="exceptionLogTrigger"/>
+				<!-- <ref bean="exceptionLogTrigger"/> -->
 			</list>
 		</property>
 	</bean>
@@ -45,14 +45,14 @@
 	<bean id="spsLogAnalyzerTask" class="com.tcs.klm.fancylog.task.SPSLogAnalyzerTask" />
 	<bean id="exceptionLogTask" class="com.tcs.klm.fancylog.task.ExceptionLogTask"/>
 
-	<bean name="exceptionLogJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+	<!-- <bean name="exceptionLogJob" class="org.springframework.scheduling.quartz.JobDetailBean">
 		<property name="jobClass" value="com.tcs.klm.fancylog.job.ExceptionLogJob"/>
 		<property name="jobDataAsMap">
 			<map>
 				<entry key="exceptionLogTask" value-ref="exceptionLogTask"></entry>
 			</map>
 		</property>
-	</bean>
+	</bean> -->
 	
 	<bean name="spsLogAnalyzerJob" class="org.springframework.scheduling.quartz.JobDetailBean">
 		<property name="jobClass" value="com.tcs.klm.fancylog.job.SPSLogAnalyzerJob" />
@@ -63,10 +63,10 @@
 		</property>
 	</bean>
 
-	<bean id="exceptionLogTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+	<!-- <bean id="exceptionLogTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="exceptionLogJob" />
 		<property name="cronExpression" value="50 30 2 * * ?"/>
-	</bean>
+	</bean> -->
 	
 	<bean id="spsLogAnalyzerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="spsLogAnalyzerJob" />

@@ -7,8 +7,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,6 +43,7 @@ public class DownloadAnalysisThread implements Runnable {
     private Map<String, LogAnalyzer> logAnalyzerMap;
     private MongoTemplate mongoTemplate;
     private String downloadLocation;
+    private String noOfDays;
 
     private static Map<String, StringBuffer> lstTempLogs = new HashMap<String, StringBuffer>();
     private static Map<String, List<LogKey>> lstTmpKeys = new HashMap<String, List<LogKey>>();
@@ -52,7 +51,7 @@ public class DownloadAnalysisThread implements Runnable {
     private String COLLECTION_LOGS;
 
     public DownloadAnalysisThread(String logInURL, String userName, String passWord, String hyperLink, String sessionIDPossition, String downloadLocation, Map<String, LogAnalyzer> logAnalyzerMap,
-                    MongoTemplate mongoTemplate) {
+                    MongoTemplate mongoTemplate, String noOfDays) {
         this.httpClient = FancySharedInfo.getInstance().getAuthenticatedHttpClient(logInURL, userName, passWord);
         this.hyperLink = hyperLink;
         this.sessionIDPossition = sessionIDPossition;
@@ -61,6 +60,7 @@ public class DownloadAnalysisThread implements Runnable {
         this.downloadLocation = downloadLocation;
         COLLECTION_TRANSACTION = "transactions";// + "_" + FancySharedInfo.getInstance().getDay(FancySharedInfo.getInstance().getCalendar());
         COLLECTION_LOGS = "logs";// + "_" + FancySharedInfo.getInstance().getDay(FancySharedInfo.getInstance().getCalendar());
+        this.noOfDays = noOfDays;
     }
 
     @Override
@@ -117,6 +117,7 @@ public class DownloadAnalysisThread implements Runnable {
                     sbf.append(sCurrentLine);
                 }
             }
+            file.delete();
         }
         catch (Exception exception) {
             APPLICATION_LOGGER.error("excetion occured while Analyzing {}", exception);
@@ -174,6 +175,10 @@ public class DownloadAnalysisThread implements Runnable {
                         for (LogKey logKey : logKeys) {
                             logKey.setSessionID(sessionID);
                             logKey.setDate(date);
+                            Calendar cal = Calendar.getInstance();
+                            cal.add(Calendar.DATE, Integer.valueOf(noOfDays));
+                            Date expireDate = cal.getTime();
+                            logKey.setExpireAt(expireDate);
                         }
                         lstTempLogs.put(sessionID, sbfTemp);
                         lstTmpKeys.put(sessionID, logKeys);
@@ -204,10 +209,10 @@ public class DownloadAnalysisThread implements Runnable {
 
                     DBObject dBObjectLog = new BasicDBObject();
                     dBObjectLog.put("log", compressedLog);
-                    Date today = Calendar.getInstance().getTime();
-                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH");
-                    String date1 = formatter.format(today);
-                    dBObjectLog.put("date", date1);
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.DATE, Integer.valueOf(noOfDays));
+                    Date expireDate = cal.getTime();
+                    dBObjectLog.put("expireAt", expireDate);
                     dbCollectionLog.insert(dBObjectLog);
                     String logID = dBObjectLog.get("_id").toString();
 

@@ -55,6 +55,7 @@ public class SPSLogAnalyzerTask {
             String fileName = (String) settings.get("fileName");
             String sessionIDPossition = (String) settings.get("sessionIdPosition");
             String downloadLocation = (String) settings.get("downloadLocation");
+            String noOfDays = (String) settings.get("noOfDays");
             List<String> lstHyeperLink = new ArrayList<String>();
             APPLICATION_LOGGER.info("trying to loggin Fancylog main page");
             HttpClient httpClient = FancySharedInfo.getInstance().getAuthenticatedHttpClient(logInURL, userName, passWord);
@@ -80,34 +81,34 @@ public class SPSLogAnalyzerTask {
                     }
                 }
                 if (!lstHyeperLink.isEmpty()) {
-                    starFileDownloadAndAnalysis(logInURL, userName, passWord, lstHyeperLink, sessionIDPossition, downloadLocation);
+                    starFileDownloadAndAnalysis(logInURL, userName, passWord, lstHyeperLink, sessionIDPossition, downloadLocation, noOfDays);
                 }
                 File file = new File(downloadLocation);
                 if (FancySharedInfo.getInstance().getFaildHyperLinks() != null) {
                     APPLICATION_LOGGER.info("retrying failed log files");
-                    FancySharedInfo.getInstance().deleteDirectory(file);
-                    starFileDownloadAndAnalysis(logInURL, userName, passWord, FancySharedInfo.getInstance().getFaildHyperLinks(), sessionIDPossition, downloadLocation);
+                    deleteDirectory(file);
+                    starFileDownloadAndAnalysis(logInURL, userName, passWord, FancySharedInfo.getInstance().getFaildHyperLinks(), sessionIDPossition, downloadLocation, noOfDays);
                     FancySharedInfo.getInstance().clearFaildHyperLinks();
                 }
-                FancySharedInfo.getInstance().deleteDirectory(file);
+                deleteDirectory(file);
             }
             FancySharedInfo.getInstance().incrementCalenderByOneHr();
         }
     }
 
-    private void starFileDownloadAndAnalysis(String logInURL, String userName, String passWord, List<String> lstHyeperLink, String sessionIDPossition, String downloadLocation) {
+    private void starFileDownloadAndAnalysis(String logInURL, String userName, String passWord, List<String> lstHyeperLink, String sessionIDPossition, String downloadLocation, String noOfDays) {
         APPLICATION_LOGGER.info("Download analysis Started... ");
         try {
             Runnable task;
             List<Thread> threads = new ArrayList<Thread>();
             for (String hyperLink : lstHyeperLink) {
-                task = new DownloadAnalysisThread(logInURL, userName, passWord, hyperLink, sessionIDPossition, downloadLocation, logAnalyzerMap, mongoTemplate);
+                task = new DownloadAnalysisThread(logInURL, userName, passWord, hyperLink, sessionIDPossition, downloadLocation, logAnalyzerMap, mongoTemplate, noOfDays);
                 Thread thread = new Thread(task);
                 thread.start();
                 threads.add(thread);
             }
             for (Thread thread : threads) {
-                thread.join();
+                thread.join(60 * 60 * 1000);
             }
         }
         catch (InterruptedException e) {
@@ -150,6 +151,23 @@ public class SPSLogAnalyzerTask {
         File folder = new File(directoryPath);
         File[] listOfFiles = folder.listFiles();
         return listOfFiles;
+    }
+
+    private boolean deleteDirectory(File directory) {
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            if (null != files) {
+                for (int i = 0; i < files.length; i++) {
+                    if (files[i].isDirectory()) {
+                        deleteDirectory(files[i]);
+                    }
+                    else {
+                        files[i].delete();
+                    }
+                }
+            }
+        }
+        return (directory.delete());
     }
 
 }

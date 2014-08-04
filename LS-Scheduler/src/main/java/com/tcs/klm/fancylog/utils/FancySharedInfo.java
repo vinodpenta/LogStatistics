@@ -1,6 +1,5 @@
 package com.tcs.klm.fancylog.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -75,23 +74,6 @@ public class FancySharedInfo {
 
     public void incrementCalenderByOneHr() {
         calendar.add(Calendar.HOUR_OF_DAY, 1);
-    }
-
-    public boolean deleteDirectory(File directory) {
-        if (directory.exists()) {
-            File[] files = directory.listFiles();
-            if (null != files) {
-                for (int i = 0; i < files.length; i++) {
-                    if (files[i].isDirectory()) {
-                        deleteDirectory(files[i]);
-                    }
-                    else {
-                        files[i].delete();
-                    }
-                }
-            }
-        }
-        return (directory.delete());
     }
 
     public HttpClient getAuthenticatedHttpClient(String strLogonURL, String strLogonUserId, String strLogonPassword) {

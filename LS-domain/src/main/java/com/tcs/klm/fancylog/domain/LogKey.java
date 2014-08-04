@@ -1,5 +1,7 @@
 package com.tcs.klm.fancylog.domain;
 
+import java.util.Date;
+
 public class LogKey {
 
     private String PNR;
@@ -13,6 +15,7 @@ public class LogKey {
     private String date;
     private String logID;
     private String sessionID;
+    private Date expireAt;
 
     public String getPNR() {
         return PNR;
@@ -100,5 +103,13 @@ public class LogKey {
 
     public void setSessionID(String sessionID) {
         this.sessionID = sessionID;
+    }
+
+    public Date getExpireAt() {
+        return expireAt;
+    }
+
+    public void setExpireAt(Date expireAt) {
+        this.expireAt = expireAt;
     }
 }
