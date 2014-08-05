@@ -52,7 +52,6 @@ public class SearchLogsService {
             Object value = object.get("sessionID");
             if (value != null) {
                 logKey.setSessionID(value.toString());
-                System.out.println(value.toString());
             }
             value = object.get("date");
             if (value != null) {
