@@ -147,12 +147,6 @@ public class SPSLogAnalyzerTask {
         }
     }
 
-    private static File[] getListOfFiles(String directoryPath) {
-        File folder = new File(directoryPath);
-        File[] listOfFiles = folder.listFiles();
-        return listOfFiles;
-    }
-
     private boolean deleteDirectory(File directory) {
         if (directory.exists()) {
             File[] files = directory.listFiles();

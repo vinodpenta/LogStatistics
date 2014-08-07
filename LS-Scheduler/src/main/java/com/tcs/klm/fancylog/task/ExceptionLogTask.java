@@ -45,8 +45,6 @@ public class ExceptionLogTask {
         APPLICATION_LOGGER.info("ExceptionLogTask started...");
         DBCollection settingsCollection = mongoTemplate.getCollection(COLLECTION_SETTINGS);
         DBCursor settingsCursor = settingsCollection.find();
-        Calendar calendar = Calendar.getInstance();
-        String year = calendar.get(Calendar.YEAR) + "";
         while (settingsCursor.hasNext()) {
             DBObject settings = settingsCursor.next();
             String sessionIDPossition = (String) settings.get("sessionIdPosition");

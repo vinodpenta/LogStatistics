@@ -15,6 +15,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
 public class Utils {
+
     public static String extractXPATHSource(String xmlPayloadSource) throws TransformerConfigurationException, TransformerFactoryConfigurationError, TransformerException {
         String leftXPATHSource = null;
         if (xmlPayloadSource != null) {

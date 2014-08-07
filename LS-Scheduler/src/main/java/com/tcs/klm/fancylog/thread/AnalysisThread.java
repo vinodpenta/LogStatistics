@@ -98,7 +98,7 @@ public class AnalysisThread implements Runnable {
                 date = FancySharedInfo.getInstance().getDate(lineText);
                 LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                 if (logAnalyzer != null) {
-                    List<LogKey> logKeys = logAnalyzer.getLogKeyFromRequest(xmlPayload);
+                    List<LogKey> logKeys = logAnalyzer.getLogKeyFromRequest(xmlPayload, null);
                     if (logKeys != null && !logKeys.isEmpty()) {
                         StringBuffer sbfTemp = new StringBuffer();
                         sbfTemp.append(fileName).append("\n");
@@ -119,7 +119,7 @@ public class AnalysisThread implements Runnable {
                     serviceName = FancySharedInfo.getInstance().getServiceName(xmlPayload);
                     LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                     if (logAnalyzer != null) {
-                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload);
+                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload, null);
                         if (responseLogKey != null) {
                             List<LogKey> logKeys = lstTmpKeys.get(sessionID);
                             for (LogKey logKey : logKeys) {

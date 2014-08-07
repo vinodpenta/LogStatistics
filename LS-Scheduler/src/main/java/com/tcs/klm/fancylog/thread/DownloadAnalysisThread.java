@@ -157,17 +157,16 @@ public class DownloadAnalysisThread implements Runnable {
 
     private void processLastLine(String lineText, String sessionIDPossition, String year, String fileName) throws IOException {
         if (lineText.startsWith(year) && lineText.endsWith("Envelope>")) {
-            String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
             String sessionID = null;
             String serviceName = null;
             String date = null;
             if (lineText.contains(".PROVIDER_REQUEST")) {
                 sessionID = FancySharedInfo.getInstance().getSessionID(lineText, sessionIDPossition);
-                serviceName = FancySharedInfo.getInstance().getServiceName(xmlPayload);
+                serviceName = FancySharedInfo.getInstance().getServiceName(lineText);
                 date = FancySharedInfo.getInstance().getDate(lineText);
                 LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                 if (logAnalyzer != null) {
-                    List<LogKey> logKeys = logAnalyzer.getLogKeyFromRequest(xmlPayload);
+                    List<LogKey> logKeys = logAnalyzer.getLogKeyFromRequest(lineText, mongoTemplate);
                     if (logKeys != null && !logKeys.isEmpty()) {
                         StringBuffer sbfTemp = new StringBuffer();
                         sbfTemp.append(fileName).append("\n");
@@ -189,10 +188,10 @@ public class DownloadAnalysisThread implements Runnable {
                 sessionID = FancySharedInfo.getInstance().getSessionID(lineText, sessionIDPossition);
                 if (lstTmpKeys.containsKey(sessionID)) {
                     lstTempLogs.get(sessionID).append(lineText).append("\n");
-                    serviceName = FancySharedInfo.getInstance().getServiceName(xmlPayload);
+                    serviceName = FancySharedInfo.getInstance().getServiceName(lineText);
                     LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                     if (logAnalyzer != null) {
-                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload);
+                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(lineText, mongoTemplate);
                         if (responseLogKey != null) {
                             List<LogKey> logKeys = lstTmpKeys.get(sessionID);
                             for (LogKey logKey : logKeys) {

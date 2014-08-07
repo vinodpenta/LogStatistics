@@ -11,6 +11,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -24,7 +25,8 @@ public class GetSeatOffer extends LogAnalyzer {
     private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(GetSeatOffer.class);
 
     @Override
-    public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
+    public List<LogKey> getLogKeyFromRequest(String lineText, MongoTemplate mongoTemplate) {
+        String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
 
@@ -70,7 +72,8 @@ public class GetSeatOffer extends LogAnalyzer {
     }
 
     @Override
-    public LogKey getLogKeyFromResponse(String xmlPayload) {
+    public LogKey getLogKeyFromResponse(String lineText, MongoTemplate mongoTemplate) {
+        String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
 

@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -20,7 +21,8 @@ import com.tcs.klm.fancylog.utils.Utils;
 public class ListAvailableAncillaryProducts extends LogAnalyzer {
 
     @Override
-    public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
+    public List<LogKey> getLogKeyFromRequest(String lineText, MongoTemplate mongoTemplate) {
+        String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
 
@@ -66,7 +68,7 @@ public class ListAvailableAncillaryProducts extends LogAnalyzer {
     }
 
     @Override
-    public LogKey getLogKeyFromResponse(String xmlPayload) {
+    public LogKey getLogKeyFromResponse(String lineText, MongoTemplate mongoTemplate) {
         // TODO Auto-generated method stub
         return null;
     }

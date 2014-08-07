@@ -1,7 +1,12 @@
 package com.tcs.klm.fancylog.analysis;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -12,20 +17,25 @@ import javax.xml.xpath.XPathFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import com.tcs.klm.fancylog.domain.LogKey;
+import com.tcs.klm.fancylog.utils.FancySharedInfo;
 import com.tcs.klm.fancylog.utils.Utils;
 
 @Component(value = "ListAvailableProducts")
-public class ListAvailableProducts extends LogAnalyzer {
+public class ListAvailableProducts/* extends LogAnalyzer */{
     private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(ListAvailableProducts.class);
 
-    @Override
-    public List<LogKey> getLogKeyFromRequest(String xmlPayload) {
+    // @Override
+    public List<LogKey> getLogKeyFromRequest(String lineText, MongoTemplate mongoTemplate) {
+        String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
 
@@ -72,13 +82,18 @@ public class ListAvailableProducts extends LogAnalyzer {
         return lstLogKey;
     }
 
-    @Override
-    public LogKey getLogKeyFromResponse(String xmlPayload) {
+    // @Override
+    private static LogKey getLogKeyFromResponse(String lineText, MongoTemplate mongoTemplate) {
+        String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
 
         String value = null;
         LogKey logKey = null;
+        String productType = null;
+        String productName = null;
+        String productClass = null;
+        Date date = new Date();
         try {
             String xmlPayloadNameSpaceRemoved = "<?xml version='1.0' encoding='UTF-8'?>" + Utils.removeNameSpace(xmlPayload);
             builder = builderFactory.newDocumentBuilder();
@@ -103,6 +118,40 @@ public class ListAvailableProducts extends LogAnalyzer {
             if (value != null && value.length() > 0) {
                 logKey.setErrorCode(value);
             }
+            NodeList productNodeList = (NodeList) xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/availableProduct").evaluate(doc, XPathConstants.NODESET);
+            for (int i = 0; i < productNodeList.getLength(); i++) {
+
+                value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/availableProduct[" + (i + 1) + "]/productName").evaluate(doc);
+                if (value != null && value.length() > 0) {
+                    productName = value.replace(" ", "").replace("-", "").replace("_", "").toUpperCase();
+                }
+                value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/availableProduct[" + (i + 1) + "]/productType").evaluate(doc);
+                if (value != null && value.length() > 0) {
+                    productType = value.replace(" ", "").replace("-", "").replace("_", "").toUpperCase();
+                }
+                value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/availableProduct[" + (i + 1) + "]/productClass").evaluate(doc);
+                if (value != null && value.length() > 0) {
+                    productClass = value.replace(" ", "").replace("-", "").replace("_", "").toUpperCase();
+                }
+                if (productName != null && productType != null && productClass != null) {
+                    String dateStr = FancySharedInfo.getInstance().getDate(lineText);
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH");
+                    try {
+                        date = formatter.parse(dateStr);
+                        DBCollection offerCollection = mongoTemplate.getCollection("offer");
+                        // increase no of offers by 1
+                        BasicDBObject newDocument = new BasicDBObject().append("$inc", new BasicDBObject().append("count", 1));
+                        // find query for productType and name
+                        BasicDBObject searchQuery = new BasicDBObject();
+                        searchQuery.append("productName", productName).append("productType", productType).append("productClass", productClass).append("date", date);
+
+                        offerCollection.update(searchQuery, newDocument, true, false);
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
         catch (Exception exception) {
             APPLICATION_LOGGER.debug(xmlPayload);
@@ -110,5 +159,36 @@ public class ListAvailableProducts extends LogAnalyzer {
         }
 
         return logKey;
+    }
+
+    public static void main(String ar[]) {
+        try {
+            File file = new File("C:/dev/vinod/temp.txt");
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            StringBuffer sbf = new StringBuffer();
+            String sCurrentLine = null;
+
+            while ((sCurrentLine = br.readLine()) != null) {
+                if (sCurrentLine.startsWith("2014")) {
+                    try {
+                        getLogKeyFromResponse(sCurrentLine, null);
+                    }
+                    catch (Exception e) {
+                        APPLICATION_LOGGER.error(sbf.toString());
+                        APPLICATION_LOGGER.error(e.getMessage());
+                    }
+                    sbf.delete(0, sbf.length());
+                    sbf.append(sCurrentLine);
+                }
+                else {
+                    sbf.append(sCurrentLine);
+                }
+            }
+
+        }
+        catch (Exception exception) {
+
+        }
+
     }
 }
