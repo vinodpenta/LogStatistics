@@ -1,8 +1,5 @@
 package com.tcs.klm.fancylog.analysis;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,10 +27,10 @@ import com.tcs.klm.fancylog.utils.FancySharedInfo;
 import com.tcs.klm.fancylog.utils.Utils;
 
 @Component(value = "ListAvailableProducts")
-public class ListAvailableProducts/* extends LogAnalyzer */{
+public class ListAvailableProducts extends LogAnalyzer {
     private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(ListAvailableProducts.class);
 
-    // @Override
+    @Override
     public List<LogKey> getLogKeyFromRequest(String lineText, MongoTemplate mongoTemplate) {
         String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -82,8 +79,8 @@ public class ListAvailableProducts/* extends LogAnalyzer */{
         return lstLogKey;
     }
 
-    // @Override
-    private static LogKey getLogKeyFromResponse(String lineText, MongoTemplate mongoTemplate) {
+    @Override
+    public LogKey getLogKeyFromResponse(String lineText, MongoTemplate mongoTemplate) {
         String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
@@ -161,34 +158,17 @@ public class ListAvailableProducts/* extends LogAnalyzer */{
         return logKey;
     }
 
-    public static void main(String ar[]) {
-        try {
-            File file = new File("C:/dev/vinod/temp.txt");
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            StringBuffer sbf = new StringBuffer();
-            String sCurrentLine = null;
-
-            while ((sCurrentLine = br.readLine()) != null) {
-                if (sCurrentLine.startsWith("2014")) {
-                    try {
-                        getLogKeyFromResponse(sCurrentLine, null);
-                    }
-                    catch (Exception e) {
-                        APPLICATION_LOGGER.error(sbf.toString());
-                        APPLICATION_LOGGER.error(e.getMessage());
-                    }
-                    sbf.delete(0, sbf.length());
-                    sbf.append(sCurrentLine);
-                }
-                else {
-                    sbf.append(sCurrentLine);
-                }
-            }
-
-        }
-        catch (Exception exception) {
-
-        }
-
-    }
+    /*
+     * public static void main(String ar[]) { try { File file = new File("C:/dev/vinod/temp.txt"); BufferedReader br = new BufferedReader(new FileReader(file)); StringBuffer sbf = new StringBuffer(); String sCurrentLine
+     * = null;
+     * 
+     * while ((sCurrentLine = br.readLine()) != null) { if (sCurrentLine.startsWith("2014")) { try { getLogKeyFromResponse(sCurrentLine, null); } catch (Exception e) { APPLICATION_LOGGER.error(sbf.toString());
+     * APPLICATION_LOGGER.error(e.getMessage()); } sbf.delete(0, sbf.length()); sbf.append(sCurrentLine); } else { sbf.append(sCurrentLine); } }
+     * 
+     * } catch (Exception exception) {
+     * 
+     * }
+     * 
+     * }
+     */
 }
