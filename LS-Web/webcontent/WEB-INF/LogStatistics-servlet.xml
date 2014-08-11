@@ -8,7 +8,7 @@
        
     <!-- Factory bean that creates the Mongo instance -->
     <bean id="mongo" class="org.springframework.data.mongodb.core.MongoFactoryBean">
-        <property name="host" value="klm006726" />
+        <property name="host" value="klm006726" />   
     </bean>
      
     <!-- MongoTemplate for connecting and quering the documents in the database -->
