@@ -41,6 +41,8 @@ public class SPSLogAnalyzerTask {
     public void performTask(Calendar calendar) {
         DBCollection dbCollection = mongoTemplate.getCollection(COLLECTION_NAME);
         DBCursor dbCursor = dbCollection.find();
+        FancySharedInfo.getInstance().incrementCalenderByOneHr();
+
         while (dbCursor.hasNext()) {
             DBObject settings = dbCursor.next();
             String applicationName = (String) settings.get("applicationName");
@@ -83,16 +85,12 @@ public class SPSLogAnalyzerTask {
                 if (!lstHyeperLink.isEmpty()) {
                     starFileDownloadAndAnalysis(logInURL, userName, passWord, lstHyeperLink, sessionIDPossition, downloadLocation, noOfDays);
                 }
-                File file = new File(downloadLocation);
                 if (FancySharedInfo.getInstance().getFaildHyperLinks() != null) {
                     APPLICATION_LOGGER.info("retrying failed log files");
-                    deleteDirectory(file);
                     starFileDownloadAndAnalysis(logInURL, userName, passWord, FancySharedInfo.getInstance().getFaildHyperLinks(), sessionIDPossition, downloadLocation, noOfDays);
                     FancySharedInfo.getInstance().clearFaildHyperLinks();
                 }
-                deleteDirectory(file);
             }
-            FancySharedInfo.getInstance().incrementCalenderByOneHr();
         }
     }
 

@@ -117,10 +117,18 @@ public class DownloadAnalysisThread implements Runnable {
                     sbf.append(sCurrentLine);
                 }
             }
+            br.close();
             file.delete();
         }
         catch (Exception exception) {
             APPLICATION_LOGGER.error("excetion occured while Analyzing {}", exception);
+            try {
+                br.close();
+            }
+            catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
     }
