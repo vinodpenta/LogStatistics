@@ -12,6 +12,9 @@
 <link href="../static/bootstrap/css/bootstrap.css" rel="stylesheet">
 <link href="../static/bootstrap/css/docs.css" rel="stylesheet">
 
+<!-- Bootstrap javaScript -->
+<script src="../static/bootstrap/js/bootstrap.js" type="text/javascript"></script>
+
 <!-- JTable -->
 <link href="../static/jtable/themes/lightcolor/gray/jtable.css" rel="stylesheet" type="text/css" />
 <script src="../static/jtable/jquery.jtable.min.js" type="text/javascript"></script>

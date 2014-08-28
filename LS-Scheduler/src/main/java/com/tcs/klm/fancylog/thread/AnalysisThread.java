@@ -119,7 +119,7 @@ public class AnalysisThread implements Runnable {
                     serviceName = FancySharedInfo.getInstance().getServiceName(xmlPayload);
                     LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                     if (logAnalyzer != null) {
-                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload, null);
+                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(xmlPayload, null, null);
                         if (responseLogKey != null) {
                             List<LogKey> logKeys = lstTmpKeys.get(sessionID);
                             for (LogKey logKey : logKeys) {

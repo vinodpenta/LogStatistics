@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,9 +21,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.tcs.klm.fancylog.domain.LogKey;
+import com.tcs.klm.fancylog.domain.Offer;
 import com.tcs.klm.fancylog.utils.FancySharedInfo;
 import com.tcs.klm.fancylog.utils.Utils;
 
@@ -80,7 +80,7 @@ public class ListAvailableProducts extends LogAnalyzer {
     }
 
     @Override
-    public LogKey getLogKeyFromResponse(String lineText, MongoTemplate mongoTemplate) {
+    public LogKey getLogKeyFromResponse(String lineText, MongoTemplate mongoTemplate, Map<Offer, Integer> offerMap) {
         String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;
@@ -117,32 +117,36 @@ public class ListAvailableProducts extends LogAnalyzer {
             }
             NodeList productNodeList = (NodeList) xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/availableProduct").evaluate(doc, XPathConstants.NODESET);
             for (int i = 0; i < productNodeList.getLength(); i++) {
-
+                Offer offer = new Offer();
                 value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/availableProduct[" + (i + 1) + "]/productName").evaluate(doc);
                 if (value != null && value.length() > 0) {
                     productName = value.replace(" ", "").replace("-", "").replace("_", "").toUpperCase();
+                    offer.setProductName(productName);
                 }
                 value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/availableProduct[" + (i + 1) + "]/productType").evaluate(doc);
                 if (value != null && value.length() > 0) {
                     productType = value.replace(" ", "").replace("-", "").replace("_", "").toUpperCase();
+                    offer.setProductType(productType);
                 }
                 value = xPath.compile("/Envelope/Body/ListAvailableProductsResponse/listAvailableProductsSuccessResponse/availableProduct[" + (i + 1) + "]/productClass").evaluate(doc);
                 if (value != null && value.length() > 0) {
                     productClass = value.replace(" ", "").replace("-", "").replace("_", "").toUpperCase();
+                    offer.setProductClass(productClass);
                 }
                 if (productName != null && productType != null && productClass != null) {
                     String dateStr = FancySharedInfo.getInstance().getDate(lineText);
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH");
                     try {
                         date = formatter.parse(dateStr);
-                        DBCollection offerCollection = mongoTemplate.getCollection("offer");
-                        // increase no of offers by 1
-                        BasicDBObject newDocument = new BasicDBObject().append("$inc", new BasicDBObject().append("count", 1));
-                        // find query for productType and name
-                        BasicDBObject searchQuery = new BasicDBObject();
-                        searchQuery.append("productName", productName).append("productType", productType).append("productClass", productClass).append("date", date);
-
-                        offerCollection.update(searchQuery, newDocument, true, false);
+                        offer.setDate(date);
+                        Integer count = offerMap.get(offer);
+                        if (count != null) {
+                            count++;
+                        }
+                        else {
+                            count = new Integer(1);
+                            offerMap.put(offer, count);
+                        }
                     }
                     catch (Exception e) {
                         e.printStackTrace();

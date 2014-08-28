@@ -1,6 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -14,9 +14,8 @@
 <link href="../static/bootstrap/css/bootstrap.css" rel="stylesheet">
 <link href="../static/bootstrap/css/docs.css" rel="stylesheet">
 
-<!-- JTable -->
-<link href="../static/jtable/themes/lightcolor/gray/jtable.css" rel="stylesheet" type="text/css" />
-<script src="../static/jtable/jquery.jtable.min.js" type="text/javascript"></script>
+<!-- Bootstrap javaScript -->
+<script src="../static/bootstrap/js/bootstrap.js" type="text/javascript"></script>
 
 <!-- Am charts -->
 <script src="../static/amcharts/amcharts.js" type="text/javascript"></script>
@@ -71,7 +70,10 @@
                     pathToImages: "../static/amcharts/images/",
                     dataProvider: chartData,
                     categoryField: "date",
-                    
+                    titles: [{
+                        "text": "Anachillary Offers",
+                        "size": 15
+                    }],                    
                     categoryAxis: {
                         parseDates: true,
                         gridAlpha: 0.15,
@@ -375,7 +377,8 @@
                         fullWidth:true,
                         cursorPosition:"mouse",
                         categoryBalloonDateFormat:"JJ:NN, DD MMMM",
-                        cursorAlpha:0.1
+                        cursorAlpha:0.1,
+                        pan: true
                     },
                     chartScrollbar: {
                         scrollbarHeight: 40,

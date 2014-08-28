@@ -4,6 +4,7 @@ import java.util.Calendar;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.StatefulJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import com.tcs.klm.fancylog.task.SPSLogAnalyzerTask;
 import com.tcs.klm.fancylog.utils.FancySharedInfo;
 
-public class SPSLogAnalyzerJob extends QuartzJobBean {
+public class SPSLogAnalyzerJob extends QuartzJobBean implements StatefulJob {
 
     private static final Logger APPLICATION_LOGGER = LoggerFactory.getLogger(SPSLogAnalyzerJob.class);
 

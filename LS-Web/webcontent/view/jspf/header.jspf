@@ -1,9 +1,22 @@
 
 <nav class="navbar navbar-default" role="navigation">
-	<a class="navbar-brand" href="../view/home.jsp"><span class="glyphicon glyphicon-home"></span> Fancylogs</a>
-	<!-- <a class="navbar-brand" href="exceptions.jsp"><span class="glyphicon glyphicon-warning-sign"></span> Exceptions</a> -->
-	<a class="navbar-brand" href="../config/reports"><span class="glyphicon glyphicon-stats"></span> Reports</a>
-	<a class="navbar-brand" href="../view/settings.jsp"><span class="glyphicon glyphicon-cog"></span> Settings</a>
+<div class="container-fluid">
+  <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	<ul class="nav navbar-nav">
+		<li><a href="../view/home.jsp"><span class="glyphicon glyphicon-home"></span> Fancylogs</a></li>
+		<!-- <a class="navbar-brand" href="exceptions.jsp"><span class="glyphicon glyphicon-warning-sign"></span> Exceptions</a> -->
+		<li><a  class="navbar-brand" href="../config/reports"><span class="glyphicon glyphicon-stats"></span> Reports</a></li>
+		<li class="dropdown">
+			<a class="navbar-brand dropdown-toggle" data-toggle="dropdown" href="#">Reports   <span class="caret"></span></a>
+			<ul class="dropdown-menu" role="menu">
+				<li><a href="#">Action</a></li>
+	            <li><a href="#">Another action</a></li>
+	            <li><a href="#">Something else here</a></li>
+		    </ul>
+		</li>
+		<li><a  class="navbar-brand" href="../view/settings.jsp"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
+	</ul>
 	<button type="button" class="btn btn-default navbar-btn navbar-right" onclick="window.location.href='signin.jsp'"><span class="glyphicon glyphicon-log-in"></span> Sign in</button>
-	<!-- <p class="navbar-text navbar-right">Signed in as <a href="#" class="navbar-link">Vinod Penta</a></p> -->
+	</div>
+</div>
 </nav>

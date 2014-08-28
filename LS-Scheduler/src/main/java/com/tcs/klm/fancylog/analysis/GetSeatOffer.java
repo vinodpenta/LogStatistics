@@ -3,6 +3,7 @@ package com.tcs.klm.fancylog.analysis;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,6 +18,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import com.tcs.klm.fancylog.domain.LogKey;
+import com.tcs.klm.fancylog.domain.Offer;
 import com.tcs.klm.fancylog.utils.Utils;
 
 @Component(value = "GetSeatOffer")
@@ -72,7 +74,7 @@ public class GetSeatOffer extends LogAnalyzer {
     }
 
     @Override
-    public LogKey getLogKeyFromResponse(String lineText, MongoTemplate mongoTemplate) {
+    public LogKey getLogKeyFromResponse(String lineText, MongoTemplate mongoTemplate, Map<Offer, Integer> offerMap) {
         String xmlPayload = lineText.substring(lineText.indexOf("<?xml version="));
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = null;

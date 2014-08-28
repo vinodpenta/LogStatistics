@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -28,6 +29,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.tcs.klm.fancylog.analysis.LogAnalyzer;
 import com.tcs.klm.fancylog.domain.LogKey;
+import com.tcs.klm.fancylog.domain.Offer;
 import com.tcs.klm.fancylog.utils.FancySharedInfo;
 import com.tcs.klm.fancylog.utils.Utils;
 
@@ -50,6 +52,8 @@ public class DownloadAnalysisThread implements Runnable {
     private String COLLECTION_TRANSACTION;
     private String COLLECTION_LOGS;
 
+    private Map<Offer, Integer> offerMap;
+
     public DownloadAnalysisThread(String logInURL, String userName, String passWord, String hyperLink, String sessionIDPossition, String downloadLocation, Map<String, LogAnalyzer> logAnalyzerMap,
                     MongoTemplate mongoTemplate, String noOfDays) {
         this.httpClient = FancySharedInfo.getInstance().getAuthenticatedHttpClient(logInURL, userName, passWord);
@@ -61,6 +65,7 @@ public class DownloadAnalysisThread implements Runnable {
         COLLECTION_TRANSACTION = "transactions";// + "_" + FancySharedInfo.getInstance().getDay(FancySharedInfo.getInstance().getCalendar());
         COLLECTION_LOGS = "logs";// + "_" + FancySharedInfo.getInstance().getDay(FancySharedInfo.getInstance().getCalendar());
         this.noOfDays = noOfDays;
+        offerMap = new HashMap<Offer, Integer>();
     }
 
     @Override
@@ -117,6 +122,23 @@ public class DownloadAnalysisThread implements Runnable {
                     sbf.append(sCurrentLine);
                 }
             }
+
+            DBCollection offerCollection = mongoTemplate.getCollection("offer");
+            Set<Offer> offerSet = offerMap.keySet();
+            for (Offer offer : offerSet) {
+                // increase no of offers by 1
+                BasicDBObject newDocument = new BasicDBObject().append("$inc", new BasicDBObject().append("count", offerMap.get(offer).intValue()));
+                // find query for productType and name
+                BasicDBObject searchQuery = new BasicDBObject();
+                searchQuery.append("productName", offer.getProductName()).append("productType", offer.getProductType()).append("productClass", offer.getProductClass()).append("date", offer.getDate());
+
+                offerCollection.update(searchQuery, newDocument, true, false);
+                /*
+                 * System.out.println("productName :" + offer.getProductName() + "productType :" + offer.getProductType() + "productClass :" + offer.getProductClass() + "date :" + offer.getDate() + "count : " +
+                 * offerMap.get(offer).intValue());
+                 */
+            }
+
             br.close();
             file.delete();
         }
@@ -199,7 +221,7 @@ public class DownloadAnalysisThread implements Runnable {
                     serviceName = FancySharedInfo.getInstance().getServiceName(lineText);
                     LogAnalyzer logAnalyzer = logAnalyzerMap.get(serviceName);
                     if (logAnalyzer != null) {
-                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(lineText, mongoTemplate);
+                        LogKey responseLogKey = logAnalyzer.getLogKeyFromResponse(lineText, mongoTemplate, offerMap);
                         if (responseLogKey != null) {
                             List<LogKey> logKeys = lstTmpKeys.get(sessionID);
                             for (LogKey logKey : logKeys) {
