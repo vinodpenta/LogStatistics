@@ -11,7 +11,7 @@
     	http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
     	http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<context:component-scan base-package="com.tcs.klm.fancylog.*" />
+	<context:component-scan base-package="com.home.logs.fancylog.*" />
 	<context:annotation-config />
 	<mvc:annotation-driven/>
 	<!-- <context:property-placeholder location="file:C://dev//vinod//config//fancylog.properties" /> -->
@@ -42,11 +42,11 @@
 		</property>
 	</bean>
 
-	<bean id="spsLogAnalyzerTask" class="com.tcs.klm.fancylog.task.SPSLogAnalyzerTask" />
-	<bean id="exceptionLogTask" class="com.tcs.klm.fancylog.task.ExceptionLogTask"/>
+	<bean id="spsLogAnalyzerTask" class="com.home.logs.fancylog.task.SPSLogAnalyzerTask" />
+	<bean id="exceptionLogTask" class="com.home.logs.fancylog.task.ExceptionLogTask"/>
 
 	<!-- <bean name="exceptionLogJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="com.tcs.klm.fancylog.job.ExceptionLogJob"/>
+		<property name="jobClass" value="com.home.logs.fancylog.job.ExceptionLogJob"/>
 		<property name="jobDataAsMap">
 			<map>
 				<entry key="exceptionLogTask" value-ref="exceptionLogTask"></entry>
@@ -55,7 +55,7 @@
 	</bean> -->
 	
 	<bean name="spsLogAnalyzerJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="com.tcs.klm.fancylog.job.SPSLogAnalyzerJob" />
+		<property name="jobClass" value="com.home.logs.fancylog.job.SPSLogAnalyzerJob" />
 		<property name="jobDataAsMap">
 			<map>
 				<entry key="spsLogAnalyzerTask" value-ref="spsLogAnalyzerTask" />

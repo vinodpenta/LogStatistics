@@ -13,7 +13,7 @@
     	</rollingPolicy>
 	  </appender>
 	 
-	  <logger name="com.tcs.klm" level="DEBUG">
+	  <logger name="com.home.logs" level="DEBUG">
 	    <appender-ref ref="application_log_appender"/>
 		<appender-ref ref="ASYNC"/>
 	  </logger>
